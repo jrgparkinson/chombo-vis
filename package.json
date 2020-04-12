@@ -9,6 +9,7 @@
     "vtk.js": "^13.12.2"
   },
   "scripts": {
+    "heroku-prebuild": "npm install --dev",
     "build": "webpack --progress --colors --mode development",
     "build:release": "webpack --progress --colors --mode production",
     "start": "webpack-dev-server --content-base ./dist",
