@@ -6,7 +6,9 @@
   "author": "Jamie Parkinson",
   "license": "BSD",
   "dependencies": {
-    "vtk.js": "^13.12.2"
+    "vtk.js": "^13.12.2",
+    "webpack-dev-server": "^3.10.3",
+    "webpack": "^4.42.1"
   },
   "scripts": {
     "heroku-prebuild": "npm install --dev",
@@ -19,7 +21,6 @@
   },
   "devDependencies": {
     "json-loader": "^0.5.7",
-    "kw-web-suite": "^9.0.0",
-    "webpack-dev-server": "^3.10.3"
+    "kw-web-suite": "^9.0.0"
   }
 }
