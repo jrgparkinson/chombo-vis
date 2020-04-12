@@ -20,6 +20,6 @@
   "devDependencies": {
     "json-loader": "^0.5.7",
     "kw-web-suite": "^9.0.0",
-    "webpack-dev-server": "^3.10.3",
+    "webpack-dev-server": "^3.10.3"
   }
 }
