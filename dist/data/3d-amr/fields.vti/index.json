@@ -1,0 +1,125 @@
+{
+  "origin": [
+    0.0078125, 
+    0.0078125, 
+    0.0078125
+  ], 
+  "cellData": {
+    "arrays": [], 
+    "vtkClass": "vtkDataSetAttributes"
+  }, 
+  "FieldData": {
+    "arrays": [], 
+    "vtkClass": "vtkDataSetAttributes"
+  }, 
+  "vtkClass": "vtkImageData", 
+  "pointData": {
+    "arrays": [
+      {
+        "data": {
+          "numberOfComponents": 1, 
+          "name": "Temperature", 
+          "vtkClass": "vtkDataArray", 
+          "dataType": "Float64Array", 
+          "ranges": [
+            {
+              "max": 1.2999996949302846, 
+              "component": null, 
+              "min": 0.09023559374967888
+            }
+          ], 
+          "ref": {
+            "encode": "LittleEndian", 
+            "basepath": "data", 
+            "id": "68dab379f26a8b6615f6969a83b8a886", 
+            "registration": "setScalars"
+          }, 
+          "size": 262144
+        }
+      }, 
+      {
+        "data": {
+          "numberOfComponents": 1, 
+          "name": "Porosity", 
+          "vtkClass": "vtkDataArray", 
+          "dataType": "Float64Array", 
+          "ranges": [
+            {
+              "max": 1.0, 
+              "component": null, 
+              "min": 0.4196157886716257
+            }
+          ], 
+          "ref": {
+            "encode": "LittleEndian", 
+            "basepath": "data", 
+            "id": "e207f2178199a3a865a545b7c33433fa", 
+            "registration": "setScalars"
+          }, 
+          "size": 262144
+        }
+      }, 
+      {
+        "data": {
+          "numberOfComponents": 1, 
+          "name": "Pressure", 
+          "vtkClass": "vtkDataArray", 
+          "dataType": "Float64Array", 
+          "ranges": [
+            {
+              "max": 96.71464660805216, 
+              "component": null, 
+              "min": -172.0403086980221
+            }
+          ], 
+          "ref": {
+            "encode": "LittleEndian", 
+            "basepath": "data", 
+            "id": "af94f8dd121304cfbc341b7613b98aae", 
+            "registration": "setScalars"
+          }, 
+          "size": 262144
+        }
+      }, 
+      {
+        "data": {
+          "numberOfComponents": 1, 
+          "name": "zAdvection velocity", 
+          "vtkClass": "vtkDataArray", 
+          "dataType": "Float64Array", 
+          "ranges": [
+            {
+              "max": 16.41389174994351, 
+              "component": null, 
+              "min": -33.32069688529906
+            }
+          ], 
+          "ref": {
+            "encode": "LittleEndian", 
+            "basepath": "data", 
+            "id": "c41555f6aa1daa04ec0b5bb72bbc2ae9", 
+            "registration": "setScalars"
+          }, 
+          "size": 262144
+        }
+      }
+    ], 
+    "vtkClass": "vtkDataSetAttributes"
+  }, 
+  "spacing": [
+    0.015625, 
+    0.015625, 
+    0.015625
+  ], 
+  "extent": [
+    0, 
+    63, 
+    0, 
+    63, 
+    0, 
+    63
+  ], 
+  "metadata": {
+    "name": "fields.vti"
+  }
+}
