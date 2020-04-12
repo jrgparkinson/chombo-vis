@@ -12,8 +12,7 @@
     "heroku-prebuild": "npm install --dev",
     "build": "webpack --progress --colors --mode development",
     "build:release": "webpack --progress --colors --mode production",
-    // "start": "webpack-dev-server --content-base ./dist",
-    "start": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js -d --config webpack.dev.config.js --content-base ./dist",
+    "start": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --content-base ./dist",
     "commit": "git cz",
     "semantic-release": "semantic-release",
     "test": "echo \"Error: no test specified\" && exit 1"
