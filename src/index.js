@@ -18,7 +18,7 @@ import {
   ColorMode,
   ScalarMode,
 } from 'vtk.js/Sources/Rendering/Core/Mapper/Constants';
-import controlPanel from './controller.html';
+import controlPanel from './html/controller.html';
 import vtkColorMaps from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction/ColorMaps';
 import vtkColorTransferFunction from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction';
 
@@ -70,18 +70,9 @@ function majorAxis(vec3, idxA, idxB) {
   return axis;
 }
 
-// const fullScreenRenderWindow = vtkFullScreenRenderWindow.newInstance({
-//   background: [1, 1, 1],
-// });
-// // const renderWindow = fullScreenRenderWindow.getRenderWindow();
-// // const renderer = fullScreenRenderWindow.getRenderer();
-
-// fullScreenRenderWindow.addController(controlPanel);
-
 const renderWindow = vtkRenderWindow.newInstance();
 const renderer = vtkRenderer.newInstance({ background: [1, 1, 1] });
 renderWindow.addRenderer(renderer);
-// renderWindow.addController(controlPanel);
 
 function applyStyle(el, style) {
   Object.keys(style).forEach((key) => {
@@ -89,7 +80,8 @@ function applyStyle(el, style) {
   });
 }
 
-const controlContainer = document.createElement('div');
+// const controlContainer = document.createElement('div');
+const controlContainer = document.querySelector("#controlContainer");
 controlContainer.innerHTML = controlPanel;
 bodyElement.appendChild(controlContainer);
 
@@ -141,14 +133,14 @@ function createCubePipeline() {
 }
 
 // var data_dir = 'data/plt000608-temperature-porosity/';
-var data_dir = 'data/3d-amr/';
+var data_dir = '3d-amr/';
 
 var filename = document.querySelector("#filename")
 if (filename) { filename.innerHTML = data_dir; }
 
 // Need one of these for each box on each level
 const pipelines = [];
-const boxes = require(`../dist/` + data_dir + 'boxes.json');
+const boxes = require('../static/data/' + data_dir + 'boxes.json');
 
 boxes.forEach((box) => {
   var pipeline = createCubePipeline();
@@ -323,7 +315,7 @@ function changeField(event) {
 
 //`data/plt000448-temperature-porosity.vti`
 fieldsReader
-  .setUrl(data_dir + `fields.vti`, { loadData: true })
+  .setUrl('data/' + data_dir + `fields.vti`, { loadData: true })
   .then(() => {
 
     const fieldNames = [];
@@ -533,3 +525,6 @@ global.actor = actor;
 global.mapper = mapper;
 global.marchingCube = marchingCube;
 
+if(typeof(module.hot) !== 'undefined') {
+  module.hot.accept() // eslint-disable-line no-undef
+}
