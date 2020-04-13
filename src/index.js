@@ -44,8 +44,9 @@ var style = {
 };
 // Set up for text
 const bodyElement = document.querySelector('body');
-const container = document.createElement('div');
-// container.classList.add(style.container);
+const container = document.querySelector('#container');
+if (container)
+{
 container.style = style.container;
 container.style.bottom = 0;
 container.style.top = 0;
@@ -53,7 +54,8 @@ container.style.left = 0;
 container.style.right = 0;
 container.style.height = "100vh";
 container.style.position = "absolute";
-bodyElement.appendChild(container);
+}
+// bodyElement.appendChild(container);
 let textCtx = null;
 let windowWidth = 0;
 let windowHeight = 0;
@@ -80,11 +82,6 @@ function applyStyle(el, style) {
   });
 }
 
-// const controlContainer = document.createElement('div');
-const controlContainer = document.querySelector("#controlContainer");
-controlContainer.innerHTML = controlPanel;
-bodyElement.appendChild(controlContainer);
-
 const STYLE_CONTROL_PANEL = {
   position: 'absolute',
   left: '25px',
@@ -106,7 +103,16 @@ const RENDER_STYLE = {
   touchAction: 'none'
 }
 
+// const controlContainer = document.createElement('div');
+const controlContainer = document.querySelector("#controlContainer");
+if (controlContainer)
+{
+controlContainer.innerHTML = controlPanel;
 applyStyle(controlContainer, STYLE_CONTROL_PANEL);
+}
+// bodyElement.appendChild(controlContainer);
+
+
 applyStyle(container, RENDER_STYLE);
 
 
