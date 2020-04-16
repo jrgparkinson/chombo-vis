@@ -1,1 +1,65 @@
- <!doctype html> <html> <head> <meta http-equiv=Content-type content="text/html; charset=utf-8"/> <meta name=viewport content="width=device-width,initial-scale=1"> </head> <body> <script src=/main.js></script> <div id=controlContainer></div> <script type="text/javascript" src="/main.js"></script></body> </html>
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <!-- <div id="controlContainer"></div> -->
+  <!-- <div id="container"></div> -->
+  <!-- <script type="text/javascript" src="/main.js"></script>  -->
+
+  <div id="aboutContainer"></div>
+  <div id="fileSelectorContainer"></div>
+  <div id="time"></div>
+
+
+<script type="text/javascript" src="/main.js"></script></body>
+
+<script type="text/javascript">
+
+  function populateFileList() {
+    $.getJSON('/datafiles', function (data) {
+      //data is the JSON string
+      console.log('Data files: ' + data);
+
+      var html = '';
+      data.forEach(function (data_loc) {
+        html = html.concat('<a href="/vis/' + data_loc + '" class="list-group-item list-group-item-action">' + data_loc + '</a>')
+      })
+
+      $("#fileList").html(html);
+
+      // Check if current file is valid
+      data_dir = '';
+      var url_parts = window.location.pathname.split('/')
+      if (url_parts && url_parts[1] == "vis") {
+        data_dir = url_parts[2];
+      }
+
+      if (!data.includes(data_dir)) {
+        $("#fileSelector").modal('show');
+      }
+    });
+  }
+
+  $(document).ready(populateFileList);
+  $("#fileSelector").on('shown.bs.modal', populateFileList);
+
+</script>
+
+</html>

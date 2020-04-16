@@ -1,0 +1,77 @@
+#container {
+  cursor: pointer;
+  touch-action: none;
+  bottom: 0px;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  /* height: 100vh; */
+  /* max-width: 100vw; */
+  position: absolute;
+  overflow:hidden;
+}
+
+.textCanvas {
+  height:100vh;
+  display:block;
+}
+
+#controlContainer {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  background-color: white;
+  list-style: none;
+  padding: 0px;
+  margin: 0;
+  display: block;
+  max-width: calc(100vw - 10px);
+  max-height: calc(100vh - 60px);
+  width: 350px;
+  overflow: auto;
+  z-index: 2000;
+}
+
+#timeContainer{
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size:24px;
+  z-index:2500;
+  margin: 0px;
+  padding: 0px;
+}
+
+#timeLabel{
+  float:left;
+  color: dimgray;
+}
+
+#time {
+  float:right;
+}
+
+#fileSelector {
+  z-index:3000;
+}
+
+#loading {
+	position: absolute;
+	top:0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+  	
+  margin: auto;
+  z-index:0;
+}
+
+#filename {
+  padding:0px;
+}
+
+@media only screen and (max-width: 600px) {
+#controlContainer {
+  width:100%;
+}
+}

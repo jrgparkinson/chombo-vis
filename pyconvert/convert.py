@@ -1,11 +1,12 @@
 from pyevtk.hl import imageToVTK, linesToVTK
-import xarray as xr
+
 import numpy as np
 import subprocess
 import os
 import json
 from chombopy.plotting import PltFile
 from pathlib import Path
+import argparse
 
 def create_http_dataset(output_dir, filename, cell_data, point_data, dx):
     """
@@ -46,29 +47,6 @@ def data_converter(vti_file, output_dir):
     cmd = "pvpython %s  --input %s --output %s" % (data_converter, vti_file, output_dir)
     print(cmd)
     subprocess.run(cmd,  shell=True)
-
-def create_amr_boxes_dataset(output_dir, filename, boxes):
-
-    temp_dir = os.path.join(output_dir, "temp")
-    if not os.path.exists(temp_dir):
-        os.makedirs(temp_dir)
-    vti_file = os.path.join(temp_dir, filename)
-
-    x = np.array([0, 10,
-         10, 1])
-
-    y = np.array([0, 0,
-         0, 0])
-
-    z = np.array([0, 0,
-         0, 10])
-    temp_filename = linesToVTK(vti_file, x=x, y=y, z=z)
-    data_converter(temp_filename, output_dir)
-
-
-    with open(output_dir.joinpath("boxes.json"), 'w') as outfile:
-        json.dump(boxes, outfile)
-
 
 def create_example_dataset(path, name):
     # Dimensions
@@ -213,17 +191,26 @@ def convert_chombo(input_file, output_path):
 
     print(vtk_boxes)
 
-    # boxes = [{"center": [0.8, 0.8, 0.8], "xLength": 0.8, "yLength":0.8, "zLength":0.8, "colour": [0,1,0]}]
-    create_amr_boxes_dataset(output_path, "boxes", vtk_boxes)
+    metadata = {"boxes": vtk_boxes,
+                "time": data.time}
+
+    with open(output_path.joinpath("metadata.json"), 'w') as outfile:
+        json.dump(metadata, outfile)
 
 
 if __name__ == "__main__":
 
-    # convert_chombo("../dist/data/plt000608.3d.hdf5", "../dist/data/plt000608-temperature-porosity")
+    # convert_chombo("/home/parkinsonjl/mushy-layer/examples/3d-darcy-amr/plt000200.3d.hdf5",
+    #                "../dist/data/3d-amr")
 
-    convert_chombo("/home/parkinsonjl/mushy-layer/examples/3d-darcy-amr/plt000200.3d.hdf5",
-                   "../dist/data/3d-amr")
+    parser = argparse.ArgumentParser(description='Convert Chombo AMR files to vtj.js')
+    parser.add_argument('input', type=str,
+                        help='input hdf5 file')
+    parser.add_argument('output', type=str,
+                        help='output folder')
 
-    # create_example_dataset("../dist/data", "example8")
+    args = parser.parse_args()
 
-    # create_http_dataset()
+    print(args)
+    convert_chombo(args.input, args.output)
+

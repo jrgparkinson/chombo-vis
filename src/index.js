@@ -1,11 +1,7 @@
 import 'vtk.js/Sources/favicon';
 
-import { mat4, vec3 } from 'gl-matrix';
-
 import vtkActor from 'vtk.js/Sources/Rendering/Core/Actor';
-import vtkFullScreenRenderWindow from 'vtk.js/Sources/Rendering/Misc/FullScreenRenderWindow';
 import vtkHttpDataSetReader from 'vtk.js/Sources/IO/Core/HttpDataSetReader';
-import vtkOutlineFilter from 'vtk.js/Sources/Filters/General/OutlineFilter';
 import vtkRenderWindowInteractor from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
 import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
 import vtkRenderWindow from 'vtk.js/Sources/Rendering/Core/RenderWindow';
@@ -14,24 +10,31 @@ import vtkRenderer from 'vtk.js/Sources/Rendering/Core/Renderer';
 import vtkCubeSource from 'vtk.js/Sources/Filters/Sources/CubeSource';
 import vtkImageMarchingCubes from 'vtk.js/Sources/Filters/General/ImageMarchingCubes';
 import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper';
-import {
-  ColorMode,
-  ScalarMode,
-} from 'vtk.js/Sources/Rendering/Core/Mapper/Constants';
+import { ScalarMode } from 'vtk.js/Sources/Rendering/Core/Mapper/Constants';
 import controlPanel from './html/controller.html';
-import vtkColorMaps from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction/ColorMaps';
-import vtkColorTransferFunction from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction';
-
-import vtkAxesActor from 'vtk.js/Sources/Rendering/Core/AxesActor';
-import vtkOrientationMarkerWidget from 'vtk.js/Sources/Interaction/Widgets/OrientationMarkerWidget';
-
-import vtkInteractiveOrientationWidget from 'vtk.js/Sources/Widgets/Widgets3D/InteractiveOrientationWidget';
-import vtkWidgetManager from 'vtk.js/Sources/Widgets/Core/WidgetManager';
+import about from './html/about.html';
+import fileSelector from './html/fileSelector.html';
 
 import vtkOpenGLRenderWindow from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
 import vtkPixelSpaceCallbackMapper from 'vtk.js/Sources/Rendering/Core/PixelSpaceCallbackMapper';
 
 // import style from '../src/style.module.css';
+
+var qd = {};
+if (location.search) location.search.substr(1).split`&`.forEach(item => {let [k,v] = item.split`=`; v = v && decodeURIComponent(v); (qd[k] = qd[k] || []).push(v)})
+
+console.log(location.pathname)
+
+var data_dir = '';
+var url_parts = location.pathname.split('/')
+if (url_parts && url_parts[1] == "vis") {
+  data_dir = url_parts[2];
+}
+
+const relative_data_path = '../'.repeat(url_parts.length-1) + 'data/'
+
+console.log(url_parts);
+console.log('Data dir: ' + data_dir);
 
 var style = {
   "container": {
@@ -44,18 +47,13 @@ var style = {
 };
 // Set up for text
 const bodyElement = document.querySelector('body');
-const container = document.querySelector('#container');
-if (container)
-{
-container.style = style.container;
-container.style.bottom = 0;
-container.style.top = 0;
-container.style.left = 0;
-container.style.right = 0;
-container.style.height = "100vh";
-container.style.position = "absolute";
+var container = document.querySelector('#container');
+if (!container) {
+  container = document.createElement('div');
+  container.id = 'container'; 
+  bodyElement.appendChild(container);
 }
-// bodyElement.appendChild(container);
+
 let textCtx = null;
 let windowWidth = 0;
 let windowHeight = 0;
@@ -63,12 +61,11 @@ const enableDebugCanvas = false;
 let debugHandler = null;
 
 
-
 function majorAxis(vec3, idxA, idxB) {
   const axis = [0, 0, 0];
   const idx = Math.abs(vec3[idxA]) > Math.abs(vec3[idxB]) ? idxA : idxB;
   const value = vec3[idx] > 0 ? 1 : -1;
-  axis[idx] = value;
+  axis[idx] = expr;
   return axis;
 }
 
@@ -82,39 +79,30 @@ function applyStyle(el, style) {
   });
 }
 
-const STYLE_CONTROL_PANEL = {
-  position: 'absolute',
-  left: '25px',
-  top: '25px',
-  backgroundColor: 'white',
-  borderRadius: '5px',
-  listStyle: 'none',
-  padding: '5px 10px',
-  margin: '0',
-  display: 'block',
-  border: 'solid 1px black',
-  maxWidth: 'calc(100vw - 70px)',
-  maxHeight: 'calc(100vh - 60px)',
-  overflow: 'auto',
-  zIndex: 2000,
-};
-
 const RENDER_STYLE = {
   touchAction: 'none'
 }
 
-// const controlContainer = document.createElement('div');
-const controlContainer = document.querySelector("#controlContainer");
+var controlContainer = document.querySelector("#controlContainer");
+if (!controlContainer)
+{
+controlContainer =  document.createElement('div');
+controlContainer.id = 'controlContainer';
+bodyElement.appendChild(controlContainer);
+}
+
 if (controlContainer)
 {
 controlContainer.innerHTML = controlPanel;
-applyStyle(controlContainer, STYLE_CONTROL_PANEL);
 }
-// bodyElement.appendChild(controlContainer);
 
+const aboutDiv = document.querySelector('#aboutContainer');
+aboutDiv.innerHTML = about;
+
+const fileSelectorDiv = document.querySelector("#fileSelectorContainer");
+fileSelectorDiv.innerHTML = fileSelector;
 
 applyStyle(container, RENDER_STYLE);
-
 
 
 const actor = vtkActor.newInstance();
@@ -138,26 +126,54 @@ function createCubePipeline() {
   return { cubeSource, mapper, actor };
 }
 
-// var data_dir = 'data/plt000608-temperature-porosity/';
-var data_dir = '3d-amr/';
-
-var filename = document.querySelector("#filename")
-if (filename) { filename.innerHTML = data_dir; }
-
 // Need one of these for each box on each level
 const pipelines = [];
-const boxes = require('../static/data/' + data_dir + 'boxes.json');
+
+var data_exists = true;
+let metadata = null;
+let boxes = null;
+try {
+  console.log('Get boxes')
+ metadata = require('../static/data/' + data_dir + '/metadata.json');
+ console.log('Metadata:' + metadata)
+ boxes = metadata.boxes;
+
+ document.querySelector("#time").innerHTML = metadata.time;
+ 
+} catch (err) {
+  data_exists = false;
+ }
+
+ if (!data_exists)
+ {
+
+  // const fileSelector = document.querySelector("#fileSelector");
+  // // fileSelector.modal('show');
+
+  // window['jQuery'] = window['$'] = require('jquery');
+  // $("#fileSelector").modal('show');
+
+  // alert('No data exists');
+
+ } else {
+
+  var filename = document.querySelector("#filename")
+  if (filename) { 
+    filename.innerHTML = data_dir;
+  }
+
 
 boxes.forEach((box) => {
   var pipeline = createCubePipeline();
   pipeline.actor.getProperty().setRepresentation(1);
   pipeline.actor.getProperty().setColor(box["colour"]);
+  pipeline.actor.getProperty().setLighting(false);
   ['xLength', 'yLength', 'zLength', 'center'].forEach((propertyName) => {
     pipeline.cubeSource.set({ [propertyName]: box[propertyName] });
   });
 
   pipelines.push(pipeline);
-});
+  });
 
 const domainBox = boxes[0];
 
@@ -205,65 +221,6 @@ function addRepresentation(name, filter, props = {}) {
   global[`${name}Mapper`] = mapper;
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Axes widget
-//////////////////////////////////////////////////////////////////////////////
-// const axes = vtkAxesActor.newInstance();
-// const orientationWidget = vtkOrientationMarkerWidget.newInstance({
-//   actor: axes,
-//   interactor: renderWindow.getInteractor(),
-// });
-// orientationWidget.setEnabled(true);
-// orientationWidget.setViewportCorner(
-//   vtkOrientationMarkerWidget.Corners.BOTTOM_LEFT
-// );
-// orientationWidget.setViewportSize(0.15);
-// orientationWidget.setMinPixelSize(100);
-// orientationWidget.setMaxPixelSize(300);
-
-// const widgetManager = vtkWidgetManager.newInstance();
-// widgetManager.setRenderer(orientationWidget.getRenderer());
-
-// const widget = vtkInteractiveOrientationWidget.newInstance();
-// widget.placeWidget(axes.getBounds());
-// widget.setBounds(axes.getBounds());
-// widget.setPlaceFactor(1);
-
-// const vw = widgetManager.addWidget(widget);
-
-// // Manage user interaction
-// vw.onOrientationChange(({ up, direction, action, event }) => {
-//   const focalPoint = camera.getFocalPoint();
-//   const position = camera.getPosition();
-//   const viewUp = camera.getViewUp();
-
-//   const distance = Math.sqrt(
-//     vtkMath.distance2BetweenPoints(position, focalPoint)
-//   );
-//   camera.setPosition(
-//     focalPoint[0] + direction[0] * distance,
-//     focalPoint[1] + direction[1] * distance,
-//     focalPoint[2] + direction[2] * distance
-//   );
-
-//   if (direction[0]) {
-//     camera.setViewUp(majorAxis(viewUp, 1, 2));
-//   }
-//   if (direction[1]) {
-//     camera.setViewUp(majorAxis(viewUp, 0, 2));
-//   }
-//   if (direction[2]) {
-//     camera.setViewUp(majorAxis(viewUp, 0, 1));
-//   }
-
-//   orientationWidget.updateMarkerOrientation();
-//   widgetManager.enablePicking();
-//   render();
-// });
-
-// widgetManager.enablePicking();
 
 /////////////////////////////////////////////////////////////////////////
 // Fields
@@ -320,8 +277,12 @@ function changeField(event) {
 }
 
 //`data/plt000448-temperature-porosity.vti`
+
+
+const fieldsurl = relative_data_path + data_dir + `fields.vti`;
+console.log('About to get data for field from ' + fieldsurl )
 fieldsReader
-  .setUrl('data/' + data_dir + `fields.vti`, { loadData: true })
+  .setUrl(relative_data_path + data_dir + `/fields.vti`, { loadData: true })
   .then(() => {
 
     const fieldNames = [];
@@ -353,10 +314,19 @@ fieldsReader
 
     renderer.addActor(actor);
 
-    renderer.getActiveCamera().set({ position: [-1, -1, 0.6], viewUp: [1, 1, -1] });
-    renderer.getActiveCamera().zoom(0.5);
-    renderer.resetCamera();
-    renderWindow.render();
+    function resetCameraPosition() {
+      renderer.getActiveCamera().set({ position: [-1, -1, 0.6], viewUp: [1, 1, -1] });
+      renderer.getActiveCamera().zoom(1.0);
+      renderer.resetCamera();
+      renderWindow.render();
+    }
+
+    const resetCamera = document.querySelector("#resetCamera");
+    resetCamera.addEventListener('click', (e) => {
+      resetCameraPosition();
+    });
+
+    resetCameraPosition();
 
 
     ////////////////////////////////////////////////////////////////
@@ -517,20 +487,22 @@ fieldsReader
       if (String.fromCharCode(e.charCode) === 'm') {
         renderWindow.render();
       } else if (String.fromCharCode(e.charCode) === 'n') {
-        resetCameraPosition(true);
+        resetCameraPosition();
       }
     });
 
+    document.querySelector("#loading").style.display='none';
 
   });
 
+  
 
-
-// global.fullScreen = fullScreenRenderWindow;
 global.actor = actor;
 global.mapper = mapper;
 global.marchingCube = marchingCube;
 
+ } // end if data exists
+ 
 if(typeof(module.hot) !== 'undefined') {
   module.hot.accept() // eslint-disable-line no-undef
 }

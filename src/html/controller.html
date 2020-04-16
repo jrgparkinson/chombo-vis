@@ -1,25 +1,55 @@
-<table>
-  <tr>
-    <td>File: </td>
-    <td><div id="filename"></div></td>
-  </td>
-  <tr>
-    <td>Field:</td>
-    <td>
-      <select id="field">
-      </select>
-    </td>
-  </tr>
+<div class="card">
+    <div class="card-header">
+      <div id="filename" class="h2" style="float:left;">
+        <button type="button" id="fileSelectBtn" class="btn btn-lg btn-primary"
+         data-toggle="modal" data-target="#fileSelector">Open a file</button></div>
+      <button type="button" class="btn btn-secondary " style="float:right;"
+      data-toggle="collapse" href="#collapseController" role="button" 
+      aria-expanded="false" aria-controls="collapseController">
+        Toggle Controls
+      </button>
+      
+    </div>
+    <div class="card-body collapse" id="collapseController">
+    
+    <div class="form-group row">
+        <label for="field" class="col-sm-4 col-form-label">Field</label>
+        <div class="col-sm-8">
+            <select class="form-control" id="field">
+            </select>
+        </div>
+      </div>
 
-  <tr valign="top">
-    <td><div style="margin-top:0px">Contour value:</div></td>
-    <td align="center">
-      <input id="contourVal" type="text" size="5"  >
-      <br>
-      <input class='contourValue' type="range" min="0.0" max="1.0" step="0.01" value="0.0" />
-      <div id="minRange" style="float:left;"></div> <div id="maxRange" style="float:right;"></div> <br>
-      <div style="float:left;">Min</div> <div style="float:right;">Max</div>
-    </td>
-  </tr>
-  
-</table>
+      <div class="form-group row">
+        <label for="contourVal" class="col-sm-6 col-form-label">Contour value</label>
+        <div class="col-sm-6">
+            <input id="contourVal" class="form-control" type="text" size="5"  >
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-8">
+      <input class='contourValue form-control' type="range" min="0.0" max="1.0" step="0.01" value="0.0" />
+          <div id="minRange" style="float:left;"></div> <div id="maxRange" style="float:right;"></div> <br>
+          <div style="float:left;">Min</div> <div style="float:right;">Max</div>
+          </div>
+        </div>
+
+
+        <button type="button" class="btn btn-primary" id="resetCamera">
+            Reset camera (n)
+          </button>
+    <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#about">
+        About
+      </button> -->
+
+      <button type="button" id="fileSelectBtn" class="btn btn-primary" data-toggle="modal" data-target="#fileSelector">Open file</button>
+
+     <hr>
+      <a href="#" data-toggle="modal" data-target="#about">
+        About
+      </a>
+
+    </div>
+  </div>

@@ -10,8 +10,11 @@ app.use(express.static(DIST_DIR))
 app.use(express.static('static'))
 
 app.get('*', (req, res) => {
+    console.log('PROD server');
     res.sendFile(HTML_FILE)
 })
+
+
 
 const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {

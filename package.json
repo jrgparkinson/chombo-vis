@@ -340,6 +340,7 @@
     "fragment-cache": "0.2.1",
     "fresh": "0.5.2",
     "from2": "2.3.0",
+    "fs": "0.0.1-security",
     "fs-constants": "1.0.0",
     "fs-extra": "8.1.0",
     "fs-minipass": "2.1.0",
@@ -356,7 +357,7 @@
     "git-log-parser": "1.2.0",
     "gl-matrix": "3.0.0",
     "gl-preserve-state": "1.0.0",
-    "glob": "7.1.6",
+    "glob": "^7.1.6",
     "glob-parent": "3.1.0",
     "global-dirs": "0.1.1",
     "global-modules": "1.0.0",
@@ -482,12 +483,14 @@
     "isurl": "1.0.0",
     "java-properties": "1.0.2",
     "jest-worker": "24.9.0",
+    "jquery": "^3.5.0",
     "js-base64": "2.5.2",
     "js-levenshtein": "1.1.6",
     "js-message": "1.0.5",
     "js-queue": "2.0.0",
     "js-tokens": "4.0.0",
     "js-yaml": "3.13.1",
+    "jsdom": "^16.2.2",
     "jsesc": "2.5.2",
     "json-buffer": "3.0.0",
     "json-loader": "0.5.7",
@@ -766,6 +769,7 @@
     "renderkid": "2.0.3",
     "repeat-element": "1.1.3",
     "repeat-string": "1.6.1",
+    "request": "^2.88.2",
     "require-directory": "2.1.1",
     "require-main-filename": "1.0.1",
     "requires-port": "1.0.0",
@@ -1059,5 +1063,5 @@
   "bugs": {
     "url": "https://github.com/jrgparkinson/chombo-vis/issues"
   },
-  "homepage": "https://github.com/jrgparkinson/chombo-vis#readme"
+  "homepage": "https://jrgparkinson.com"
 }

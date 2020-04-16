@@ -62,5 +62,8 @@ module.exports = {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin()
-  ]
+  ],
+  devServer: {
+    historyApiFallback: true // <-- this needs to be set to true
+}
 }
