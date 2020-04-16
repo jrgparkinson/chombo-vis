@@ -16,6 +16,8 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
     integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
     crossorigin="anonymous"></script>
+
+    <title>Chombo Visualiser</title>
 </head>
 
 <body>
@@ -54,19 +56,25 @@
       $("#fileList").html(html);
 
       // Check if current file is valid
-      data_dir = '';
-      var url_parts = window.location.pathname.split('/')
-      if (url_parts && url_parts[1] == "vis") {
-        data_dir = url_parts[2];
-      }
-
-      if (!data.includes(data_dir)) {
+      if (!data.includes(getDataFile())) {
         $("#fileSelector").modal('show');
       }
     });
   }
 
-  $(document).ready(populateFileList);
+  function getDataFile() {
+    data_dir = '';
+    var url_parts = window.location.pathname.split('/')
+    if (url_parts && url_parts[1] == "vis") {
+      data_dir = url_parts[2];
+    }
+    return data_dir
+  }
+
+  $(document).ready(function() {
+    populateFileList();
+    document.title = getDataFile() + ' - Chombo Visualiser';
+  });
   $("#fileSelector").on('shown.bs.modal', populateFileList);
 
 </script>

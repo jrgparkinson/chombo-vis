@@ -105,15 +105,9 @@ fileSelectorDiv.innerHTML = fileSelector;
 applyStyle(container, RENDER_STYLE);
 
 
-const actor = vtkActor.newInstance();
-const mapper = vtkMapper.newInstance();
-const marchingCube = vtkImageMarchingCubes.newInstance({
-  contourValue: 0.0,
-  computeNormals: true,
-  mergePoints: true,
-});
 
-// Cube
+
+// Level outlines
 function createCubePipeline() {
   const cubeSource = vtkCubeSource.newInstance();
   const actor = vtkActor.newInstance();
@@ -178,14 +172,12 @@ boxes.forEach((box) => {
 const domainBox = boxes[0];
 
 
-// Set contour color
-actor.getProperty().setColor([1, 0.5, 0.5]);
-
-actor.setMapper(mapper);
-mapper.setScalarModeToUsePointFieldData();
-mapper.setInputConnection(marchingCube.getOutputPort());
+/////////////////////////////////////////////////////////////////////////
+// Fields
+///////////////////////////////////////////////////////////////////////
 
 
+// Interaction methods
 function changeContourValInput(e) {
   const newVal = Number(e.target.value);
   setContourValue(newVal);
@@ -207,32 +199,6 @@ function updateIsoValue(e) {
   const isoValue = Number(e.target.value).toFixed(2);
   setContourValue(isoValue);
 }
-
-function addRepresentation(name, filter, props = {}) {
-  const mapper = vtkMapper.newInstance();
-  mapper.setInputConnection(filter.getOutputPort());
-
-  const actor = vtkActor.newInstance();
-  actor.setMapper(mapper);
-  actor.getProperty().set(props);
-  renderer.addActor(actor);
-
-  global[`${name}Actor`] = actor;
-  global[`${name}Mapper`] = mapper;
-}
-
-
-/////////////////////////////////////////////////////////////////////////
-// Fields
-///////////////////////////////////////////////////////////////////////
-const fieldsReader = vtkHttpDataSetReader.newInstance({ enableArray: true, fetchGzip: true });
-
-marchingCube.setInputConnection(fieldsReader.getOutputPort());
-
-let scalarMode = ScalarMode.USE_POINT_FIELD_DATA;
-
-const contourValInput = document.querySelector('#contourVal');
-if (contourValInput) { contourValInput.addEventListener('change', changeContourValInput); }
 
 function setController() {
   const dataRange = fieldsReader
@@ -276,13 +242,33 @@ function changeField(event) {
   setField(newField);
 }
 
-//`data/plt000448-temperature-porosity.vti`
 
+// Setup data structures
+const fieldsReader = vtkHttpDataSetReader.newInstance({ enableArray: true, fetchGzip: true });
 
-const fieldsurl = relative_data_path + data_dir + `fields.vti`;
-console.log('About to get data for field from ' + fieldsurl )
+// Create actor for contour plot
+const actor = vtkActor.newInstance();
+const mapper = vtkMapper.newInstance();
+const marchingCube = vtkImageMarchingCubes.newInstance({
+  contourValue: 0.0,
+  computeNormals: true,
+  mergePoints: true,
+});
+
+// Set contour color
+actor.getProperty().setColor([1, 0.5, 0.5]);
+actor.setMapper(mapper);
+mapper.setInputConnection(marchingCube.getOutputPort());
+
+marchingCube.setInputConnection(fieldsReader.getOutputPort());
+
+const contourValInput = document.querySelector('#contourVal');
+if (contourValInput) { contourValInput.addEventListener('change', changeContourValInput); }
+
+// Load the data
+const fields_url =  relative_data_path + data_dir + `/fields.vti`;
 fieldsReader
-  .setUrl(relative_data_path + data_dir + `/fields.vti`, { loadData: true })
+  .setUrl(fields_url, { loadData: true })
   .then(() => {
 
     const fieldNames = [];
@@ -307,12 +293,62 @@ fieldsReader
     }
 
 
-    // Get first element for now
-    const data = fieldsReader.getOutputData();
-
     setField(0);
 
     renderer.addActor(actor);
+
+    function createActor(fieldId, contourVal, colour) {
+
+      if (colour == undefined) { colour = [0, 0, 0]; }
+
+      const newAct = vtkActor.newInstance();
+      const newMapper = vtkMapper.newInstance();
+      const newMarchingCube = vtkImageMarchingCubes.newInstance({
+        contourValue: 0.0,
+        computeNormals: true,
+        mergePoints: true,
+      });
+
+      // Set contour color
+      newAct.getProperty().setColor(colour);
+      newAct.setMapper(newMapper);
+      newMapper.setInputConnection(newMarchingCube.getOutputPort());
+
+      // Create new fieldsReader, set data from already retrieved 
+      const clonedeep = require('lodash.clonedeep');
+      var thisFieldsReader = vtkHttpDataSetReader.newInstance({ enableArray: true, fetchGzip: true });
+      // const newData = clonedeep(iFieldsReader.getArrays()[fieldId].array.values);
+      
+      thisFieldsReader
+  .setUrl(fields_url, { loadData: true })
+  .then(() => {
+
+    thisFieldsReader.getOutputData().getPointData().getScalars().setData(
+      thisFieldsReader.getArrays()[fieldId].array.values
+    );
+
+    newMarchingCube.setInputConnection(thisFieldsReader.getOutputPort());
+
+    if (contourVal == undefined) { 
+      const dataRange = thisFieldsReader
+          .getOutputData()
+          .getPointData()
+          .getScalars()
+          .getRange();
+
+      contourVal = (dataRange[0] + dataRange[1]) / 2;
+    }
+
+  newMarchingCube.setContourValue(contourVal);
+  
+  renderer.addActor(newAct);
+  renderWindow.render();
+  });    
+      
+    }
+
+    createActor(1, 0.99, [0.1, 0.1, 1.0]);
+    
 
     function resetCameraPosition() {
       renderer.getActiveCamera().set({ position: [-1, -1, 0.6], viewUp: [1, 1, -1] });
@@ -333,9 +369,9 @@ fieldsReader
     // Text
     ////////////////////////////////////////////////////////////////
 
-    // TODO: get this from the data?
-    // const origin = [0, 0, 0];
-    const origin = data.getOrigin();
+    // Get first element for now
+    // const data = fieldsReader.getOutputData();
+    const origin = fieldsReader.getOutputData().getOrigin();
 
     // Add axis labels a third of the way along each axis
     const smallestAxis = Math.min(domainBox["xLength"], domainBox["yLength"], domainBox["zLength"]);
@@ -444,21 +480,10 @@ fieldsReader
     openglRenderWindow.setContainer(container);
     renderWindow.addView(openglRenderWindow);
 
-
     const textCanvas = document.createElement('canvas');
     textCanvas.classList.add('textCanvas'); //style.container
-    textCanvas.style = style.container;
-    textCanvas.style.bottom = 0;
-    textCanvas.style.top = 0;
-    textCanvas.style.left = 0;
-    textCanvas.style.right = 0;
-    textCanvas.style.height = "100vh";
-    textCanvas.style.position = "absolute";
-    textCanvas.style.zIndex = 1;
     container.appendChild(textCanvas);
-
     textCtx = textCanvas.getContext('2d');
-
 
     const interactor = vtkRenderWindowInteractor.newInstance();
     interactor.setView(openglRenderWindow);
@@ -497,9 +522,9 @@ fieldsReader
 
   
 
-global.actor = actor;
-global.mapper = mapper;
-global.marchingCube = marchingCube;
+// global.actor = actor;
+// global.mapper = mapper;
+// global.marchingCube = marchingCube;
 
  } // end if data exists
  
