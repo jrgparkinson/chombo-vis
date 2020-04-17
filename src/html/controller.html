@@ -11,7 +11,7 @@
       
     </div>
     <div class="card-body collapse" id="collapseController">
-    
+<!--     
     <div class="form-group row">
         <label for="field" class="col-sm-4 col-form-label">Field</label>
         <div class="col-sm-8">
@@ -34,15 +34,20 @@
           <div id="minRange" style="float:left;"></div> <div id="maxRange" style="float:right;"></div> <br>
           <div style="float:left;">Min</div> <div style="float:right;">Max</div>
           </div>
+        </div> -->
+
+        <div id="contours">
+          List contours here, with option to edit/delete
         </div>
+
+        <button type="button" id="addContourBtn" class="btn btn-primary" 
+        data-toggle="modal" data-target="#addContour">Add contour</button>
+
 
 
         <button type="button" class="btn btn-primary" id="resetCamera">
             Reset camera (n)
           </button>
-    <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#about">
-        About
-      </button> -->
 
       <button type="button" id="fileSelectBtn" class="btn btn-primary" data-toggle="modal" data-target="#fileSelector">Open file</button>
 
@@ -53,3 +58,58 @@
 
     </div>
   </div>
+
+
+
+
+
+  <div class="modal fade" id="addContour" tabindex="-1" role="dialog" 
+    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Add contour</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="addContour">
+
+            <div class="form-group row">
+                <label for="field" class="col-sm-4 col-form-label">Field</label>
+                <div class="col-sm-6">
+                    <select class="form-control" id="field-addContour">
+                    </select>
+                </div>
+              </div>
+        
+              <div class="form-group row">
+                <label for="contourVal" class="col-sm-4 col-form-label">Contour value</label>
+                <div class="col-sm-4">
+                    <input id="addContourDialogValue" class="form-control" type="text" size="5"  >
+                </div>
+                <div class="col-sm-4" id="addContourLimits">
+
+                </div>
+              </div>
+
+              <div class="form-group row">
+                <label for="colourVal" class="col-sm-4 col-form-label">Colour</label>
+                <!-- <div class="col-sm-4 row"> -->
+                  <div class="col-sm-4">
+                    <input id="colourVal" class="form-control" type="text" size="10">
+                  </div>
+                  <div class="col-sm-2">
+                    <input id="colourValPicker" type="color" name="contourColour" value="#ff0000"  >
+                  </div>
+              </div>
+
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="cancelAdContourDialogBtn" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" id="addContourDialogBtn" class="btn btn-primary" data-dismiss="modal">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>

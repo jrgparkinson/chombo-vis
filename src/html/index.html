@@ -18,6 +18,8 @@
     crossorigin="anonymous"></script>
 
     <title>Chombo Visualiser</title>
+
+
 </head>
 
 <body>
@@ -38,10 +40,12 @@
   </div>
   
 
-
 </body>
 
+
 <script type="text/javascript">
+
+var metadata;
 
   function populateFileList() {
     $.getJSON('/datafiles', function (data) {
@@ -71,11 +75,96 @@
     return data_dir
   }
 
+  
+
+// Colour converters from  https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function hexToRgb(hex) {
+  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+    return r + r + g + g + b + b;
+  });
+
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+// Sets RGB string from hex code selected
+  function updateColourInput() {
+    console.log('Update colour input');
+    var hex = $("#colourValPicker").val();
+    var {r,g,b} = hexToRgb(hex);
+    $("#colourVal").val("rgb(" + r + "," + g + "," + b + ")");
+  }
+
+  // Set to red initially
+  function setColourPicker() {
+    var hex = $("#colourValPicker").val("#ff0000");
+    updateColourInput();
+  }
+
+  function updateColourPicker() {
+    console.log('Update colour picker');
+    var rgb = $("#colourVal").val();
+    p = rgb.replace('rgb(', '').replace(')', '').split(',')
+
+    var hex = rgbToHex(Number(p[0]), 
+    Number(p[1]), Number(p[2]));
+    console.log('rgb: ' + p + ' => hex: ' + hex);
+    $("#colourValPicker").val(hex);
+  }
+
+  function printFieldLimits() {
+    var field =$("#field-addContour option:selected").text();
+
+    var limits;
+    metadata.pointData.arrays.forEach(function(array) {
+      if (array.data.name == field) {
+        limits = array.data.ranges[0];
+      }
+    });
+
+    console.log(limits);
+    console.log('Get limits for field: ' + field + ', limits: ' + limits);
+
+    $("#addContourLimits").html('Min: ' + Number(limits.min).toFixed(2) 
+    + '<br>Max: ' + Number(limits.max).toFixed(2));
+
+  }
+
   $(document).ready(function() {
     populateFileList();
     document.title = getDataFile() + ' - Chombo Visualiser';
+
+    setColourPicker();
+
+    var metadata_url = '../../data/' + getDataFile() + '/fields.vti/index.json';
+    console.log('Loading data from ' + metadata_url)
+    $.getJSON( metadata_url, function(json) {
+
+      metadata = json;
+    });
   });
   $("#fileSelector").on('shown.bs.modal', populateFileList);
+  $("#colourValPicker").on('change', updateColourInput);
+  $("#colourVal").on('keyup', updateColourPicker);
+  $("#field-addContour").on('change', printFieldLimits);
+  $("#addContourBtn").on('click', printFieldLimits);
+
+
 
 </script>
 

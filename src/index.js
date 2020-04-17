@@ -292,6 +292,24 @@ fieldsReader
       fieldSelector.addEventListener('change', changeField);
     }
 
+    document.querySelector("#field-addContour").innerHTML = fieldNames
+    .map((t, index) => `<option value="${index}">${t}</option>`)
+    .join('');
+
+    function addContour() {
+
+      const field = document.querySelector("#field-addContour").value;
+      const value = document.querySelector("#addContourDialogValue").value;
+      const colour = document.querySelector("#colourVal").value;
+
+      console.log('Add contour for field ' + field + ', value: ' + value + ', colour: ' + colour);
+
+      var rgb = colour.replace('rgb(', '').replace(')', '').split(',');
+
+      createActor(Number(field), Number(value), [Number(rgb[0]), Number(rgb[1]), Number(rgb[2])]);
+    }
+    document.querySelector("#addContourDialogBtn").addEventListener('click', addContour);
+
 
     setField(0);
 
