@@ -4,30 +4,20 @@ var vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rul
 const HtmlWebPackPlugin = require("html-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const TerserPlugin = require('terser-webpack-plugin');
-
+const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 module.exports = {
   entry: {
     main: './src/index.js'
   },
   output: {
-    path: path.join(__dirname, 'dist'),
-    publicPath: '/',
+    path: path.join(__dirname, 'vis', 'dist'),
+    publicPath: '/', //  '/vis/',
     filename: '[name].js'
   },
   target: 'web',
   devtool: 'source-map',
-  // Webpack 4 does not have a CSS minifier, although
-  // Webpack 5 will likely come with one
   optimization: {
-    // minimizer: [
-    //   new UglifyJsPlugin({
-    //     cache: true,
-    //     parallel: true,
-    //     sourceMap: true // set to true if you want JS source maps
-    //   }),
-    //   new OptimizeCSSAssetsPlugin({})
-    // ]
     minimize: true,
     minimizer: [new TerserPlugin({ parallel: 1 }),
                 new OptimizeCSSAssetsPlugin({})]
@@ -51,12 +41,14 @@ module.exports = {
             loader: "html-loader",
             options: { minimize: true }
           }
-        ]
+        ],
+        exclude: /index\.html$/
       },
       {
-        // Loads images into CSS and Javascript files
-        test: /\.jpg$/,
-        use: [{loader: "url-loader"}]
+        // Loads svg images in the same way
+        test: /\.svg$/,
+        // use: [{loader: "url-loader"}]
+        use: 'file-loader'
       },
       {
         // Loads CSS into a file when you import it via Javascript
@@ -67,10 +59,12 @@ module.exports = {
     ].concat(vtkRules)
   },
   plugins: [
+    new HtmlWebPackPlugin(),
     new HtmlWebPackPlugin({
       template: "./src/html/index.html",
-      filename: "./index.html"
+      filename: "./index.html",
     }),
+    new BaseHrefWebpackPlugin({ baseHref: '/vis/' }),
     new MiniCssExtractPlugin({
       filename: "[name].css",
       chunkFilename: "[id].css"

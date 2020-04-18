@@ -4,49 +4,51 @@ import vtkRenderWindowInteractor from 'vtk.js/Sources/Rendering/Core/RenderWindo
 import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
 import vtkRenderWindow from 'vtk.js/Sources/Rendering/Core/RenderWindow';
 import vtkRenderer from 'vtk.js/Sources/Rendering/Core/Renderer';
-
 import vtkCubeSource from 'vtk.js/Sources/Filters/Sources/CubeSource';
 import vtkImageMarchingCubes from 'vtk.js/Sources/Filters/General/ImageMarchingCubes';
 import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper';
-import controlPanel from './html/controller.html';
 import about from './html/about.html';
 import addEditContour from './html/addEditContourDialog.html';
 import fileSelector from './html/fileSelector.html';
-
 import vtkOpenGLRenderWindow from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
 import vtkPixelSpaceCallbackMapper from 'vtk.js/Sources/Rendering/Core/PixelSpaceCallbackMapper';
+
+//////////////////////////////
+// Create images
+//////////////////////////////
+import imgMenu from './img/menu.svg';
+import imgPlus from './img/plus.svg';
+import imgTrash from './img/trash.svg';
+import imgWrench from './img/wrench.svg';
+import imgReset from './img/loop.svg';
+import imgOpen from './img/folder.svg';
+document.querySelector("#menuIcon").src = imgMenu;
+document.querySelector(".plusIcon").src = imgPlus;
+document.querySelector(".resetIcon").src = imgReset;
+document.querySelector(".openIcon").src = imgOpen;
 
 ////////////////////////////////////////////////
 // Utilities
 /////////////////////////////////////////////
-function componentToHex(c) {
-  var hex = c.toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
-}
+// const OPEN_PATH = 'open';
+
+// function componentToHex(c) {
+//   let hex = c.toString(16);
+//   return hex.length == 1 ? "0" + hex : hex;
+// }
+import { OPEN_PATH } from '../static/js/clientSide';
+import { componentToHex } from '../static/js/utilities.js';
+import { active } from 'promise-inflight';
 
 function rgbToHex(r, g, b) {
+  console.log('To hex: ' + r + '/' + g + '/' + b);
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 // Colour converters from  https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 function hexToRgb(hex) {
-  // console.log('Hex to RGB: ' + hex);
-  // // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-  // var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  // hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-  //   console.log(r + g + b);
-  //   return r + r + g + g + b + b;
-  // });
-
-  // var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  // console.log(result);
-  // return result ? {
-  //   r: parseInt(result[1], 16),
-  //   g: parseInt(result[2], 16),
-  //   b: parseInt(result[3], 16)
-  // } : null;
   const hexRgb = require('hex-rgb');
-  return hexRgb(hex, {format: 'array'});
+  return hexRgb(hex, { format: 'array' });
 }
 
 function noContoursLi() {
@@ -56,7 +58,7 @@ function noContoursLi() {
   noContours.style.display = 'inline';
   noContours.innerHTML = `<a id="addContourBtn" class="add"
   data-toggle="modal" data-target="#addContour" alt="Add contour (a)"
-  data-toggle="tooltip" title="Add contour (a)"><img src='/img/plus.svg' class="contourControl"> Add a contour</a>`;
+  data-toggle="tooltip" title="Add contour (a)"><img src='` + imgPlus + `' class="contourControl"> Add a contour</a>`;
   return noContours;
 }
 
@@ -65,25 +67,31 @@ function noContoursLi() {
 //////////////////////////////////
 
 
-var qd = {};
+let qd = {};
 if (location.search) location.search.substr(1).split`&`.forEach(item => { let [k, v] = item.split`=`; v = v && decodeURIComponent(v); (qd[k] = qd[k] || []).push(v) })
 
-console.log(location.pathname)
-
-var data_dir = '';
-var url_parts = location.pathname.split('/')
-if (url_parts && url_parts[1] == "vis") {
-  data_dir = url_parts[2];
+// Get pathname minus basename
+let base = '/';
+if (document.getElementsByTagName('base')[0] != null) {
+  base = document.getElementsByTagName('base')[0].getAttribute("href");
+}
+const rel_pathname = location.pathname.replace(base, '')
+let data_dir = '';
+let url_parts = rel_pathname.split('/')
+if (url_parts && url_parts[0] == OPEN_PATH) {
+  data_dir = url_parts[1];
 }
 
-const relative_data_path = '../'.repeat(url_parts.length - 1) + 'data/'
+const relative_base_path = '../'.repeat(url_parts.length);
+const relative_data_path = relative_base_path + 'data/'
 
-console.log(url_parts);
-console.log('Data dir: ' + data_dir);
+// console.log(url_parts);
+console.log('Data dir: ' + data_dir + ' from url parts: ' + url_parts);
+// console.log('Relative data path: ' + relative_data_path);
 
 // Set up for text
 const bodyElement = document.querySelector('body');
-var container = document.querySelector('#container');
+let container = document.querySelector('#container');
 if (!container) {
   container = document.createElement('div');
   container.id = 'container';
@@ -109,12 +117,7 @@ const RENDER_STYLE = {
   touchAction: 'none'
 }
 
-var controlContainer = document.querySelector("#controlContainer");
-if (!controlContainer) {
-  controlContainer = document.createElement('div');
-  controlContainer.id = 'controlContainer';
-  bodyElement.appendChild(controlContainer);
-}
+let controlContainer = document.querySelector("#controlContainer");
 
 // Add contour dialog
 let doc = new DOMParser().parseFromString(addEditContour, 'text/html');
@@ -143,7 +146,7 @@ editContourDiv.querySelector("#addContourLimits").id = 'editContourLimits';
 bodyElement.appendChild(editContourDiv);
 
 if (controlContainer) {
-  controlContainer.innerHTML = controlPanel;
+  // controlContainer.innerHTML = controlPanel;
 
   let contourList = document.querySelector("#contourListContainer");
   contourList.appendChild(noContoursLi());
@@ -176,18 +179,22 @@ function createCubePipeline() {
 // Need one of these for each box on each level
 const pipelines = [];
 
-var data_exists = true;
+let data_exists = true;
 let metadata = null;
 let boxes = null;
 try {
-  console.log('Get boxes')
-  metadata = require('../static/data/' + data_dir + '/metadata.json');
-  console.log('Metadata:' + metadata)
+  // This is a file system relative path - doesn't depend on how we're releasing files,
+  // Just where they are when we compile (I think)
+  // console.log("Get boxes");
+  metadata = require("../static/data/" + data_dir + "/metadata.json"); // works on dev
+  // metadata = require("../../static/data/" + data_dir + "/metadata.json"); // works on dev
+  console.log('Got metadata:' + metadata)
   boxes = metadata.boxes;
 
   document.querySelector("#time").innerHTML = metadata.time;
 
 } catch (err) {
+  console.log(err);
   data_exists = false;
 }
 
@@ -202,20 +209,22 @@ if (!data_exists) {
   // alert('No data exists');
 
 
-
+  console.log("No data exists");
 } else {
+
+  // console.log("Data exists");
 
   document.querySelector("#loading").style.display = 'inherit';
   document.querySelector("#timeContainer").style.display = 'inherit';
 
-  var filename = document.querySelector("#filename")
+  let filename = document.querySelector("#filename")
   if (filename) {
     filename.innerHTML = data_dir;
   }
 
 
   boxes.forEach((box) => {
-    var pipeline = createCubePipeline();
+    let pipeline = createCubePipeline();
     pipeline.actor.getProperty().setRepresentation(1);
     pipeline.actor.getProperty().setColor(box["colour"]);
     pipeline.actor.getProperty().setLighting(false);
@@ -247,7 +256,7 @@ if (!data_exists) {
   function setContourValue(val) {
     console.log("Set contour value: " + val);
     marchingCube.setContourValue(val);
-    var contourVal = document.querySelector('#contourVal');
+    let contourVal = document.querySelector('#contourVal');
     if (contourVal) { contourVal.value = val; }
     // document.querySelector('.contourValue').setAttribute('value', val);
     renderWindow.render();
@@ -264,7 +273,7 @@ if (!data_exists) {
       .getScalars()
       .getRange();
 
-    var firstIsoValue = (dataRange[0] + dataRange[1]) / 2;
+    let firstIsoValue = (dataRange[0] + dataRange[1]) / 2;
     firstIsoValue = firstIsoValue.toFixed(2);
 
     const el = document.querySelector('.contourValue');
@@ -310,7 +319,9 @@ if (!data_exists) {
   let fieldsReaders = [];
 
   // Load the data
-  const fields_url = relative_data_path + data_dir + `/fields.vti`;
+  // const fields_url = relative_data_path + data_dir + `/fields.vti`;
+  const fields_url = base + 'data/' + data_dir + `/fields.vti`;
+  console.log("Attempt to read data from " + fields_url);
   fieldsReader
     .setUrl(fields_url, { loadData: true })
     .then(() => {
@@ -336,32 +347,77 @@ if (!data_exists) {
         fieldSelector.addEventListener('change', changeField);
       }
 
-      document.querySelectorAll(".fieldNameSelect").forEach(function(field) {
-          field.innerHTML = fieldNames
+      document.querySelectorAll(".fieldNameSelect").forEach(function (field) {
+        field.innerHTML = fieldNames
           .map((t, index) => `<option value="${index}">${t}</option>`)
           .join('');
       });
-      
+
       function editContour(id, fieldId, value, colour) {
-        console.log("Edit contour(" + id + ") field: " +  fieldId + ", val: " + 
-                    value + ", colour: " + colour);
+        console.log("Edit contour(" + id + ") field: " + fieldId + ", val: " +
+          value + ", colour: " + colour);
         const newData = fieldsReaders[id].getArrays()[fieldId].array.values;
         fieldsReaders[id].getOutputData().getPointData().getScalars().setData(newData);
         actors[id].getProperty().setColor(normalizedColour(hexToRgb(colour)));
         marchingCubes[id].setContourValue(value);
 
-        renderWindow.render();
+        // update url
+        const oldSegment = getUrlItem(id);
+        const newUrl = location.pathname.replace(oldSegment, encodeForURL(id, fieldId, value, colour));
+        window.history.pushState({}, "", newUrl);
 
+        renderWindow.render();
       }
 
       function normalizedColour(colour) {
         console.log("Make normalized colour of " + colour.toString());
-        
-        var max = colour.reduce(function(a, b) { return Math.max(a, b); });
-        var normalizedColour;
-        if (max > 1) {  normalizedColour = colour.map(function(item) { return item/255 }); }
+
+        let max = colour.reduce(function (a, b) { return Math.max(a, b); });
+        let normalizedColour;
+        if (max > 1) { normalizedColour = colour.map(function (item) { return item / 255 }); }
         else { normalizedColour = colour; }
         return normalizedColour;
+      }
+
+      function encodeForURL(contourId, fieldId, value, colour) {
+        return contourId + '_' + fieldId + '_' + value + '_' + colour;
+      }
+
+      function getCurrentFields() {
+        // console.log('Searching for contours in url: ' + location.pathname);
+        const reGlobal = /\/(\d+)_(\d+)_(\d+[\.]*[\d]*)_([a-z0-9]+)/g;
+        const re = /\/(\d+)_(\d+)_(\d+[\.]*[\d]*)_([a-z0-9]+)/;
+        const matches = location.pathname.match(reGlobal);
+        // console.log(matches);
+
+        let contours = [];
+        if (matches) {
+          matches.forEach(function (match) {
+            const thisMatch = match.match(re);
+            console.log(thisMatch);
+            contours.push({
+              'id': Number(thisMatch[1]),
+              'fieldId': Number(thisMatch[2]),
+              'value': Number(thisMatch[3]),
+              'hexColour': "#" + thisMatch[4]
+            });
+          })
+          // console.log(contours);
+        }
+        return contours;
+      }
+
+      function getUrlItem(contourId) {
+
+        const re = new RegExp("\/(" + contourId + "_[^/]*)", "g");
+        console.log('Searching in url ' + location.pathname + ' for ' + re);
+        const matches = location.pathname.match(re);
+        console.log(matches);
+        if (matches) {
+          return matches[0];
+        } else {
+          return undefined;
+        }
       }
 
       function addContour() {
@@ -372,14 +428,15 @@ if (!data_exists) {
 
         console.log('Add contour for field ' + field + ', value: ' + value + ', colour: ' + colour);
 
-        var rgb = colour.replace('rgb(', '').replace(')', '').split(',');
+        let rgb = colour.replace('rgb(', '').replace(')', '').split(',');
 
         createActor(Number(field), Number(value), [Number(rgb[0]), Number(rgb[1]), Number(rgb[2])]);
+
       }
       document.querySelector("#addContourDialogBtn").addEventListener('click', addContour);
-      document.querySelector("#editContourDialogBtn").addEventListener('click', function(e) {
-        console.log(e.target);
-        const contourId = e.target.dataset.id; 
+      document.querySelector("#editContourDialogBtn").addEventListener('click', function (e) {
+        // console.log(e.target);
+        const contourId = e.target.dataset.id;
 
         const field = document.querySelector("#field-editContour").value;
         const value = document.querySelector("#editContourDialogValue").value;
@@ -393,7 +450,7 @@ if (!data_exists) {
           // addContour();
           let element = document.querySelector("#addContourDialogBtn");
           // trigger submit event
-          var event; // The custom event that will be created
+          let event; // The custom event that will be created
           if (document.createEvent) {
             event = document.createEvent("HTMLEvents");
             event.initEvent("click", true, true);
@@ -411,16 +468,15 @@ if (!data_exists) {
       // setField(0);
       // renderer.addActor(actor);
 
-     
 
-      function createActor(fieldId, contourVal, colour) {
 
+      function createActor(fieldId, contourVal, colour, addToUrl, id) {
+        if (addToUrl == undefined) { addToUrl = true; }
         if (colour == undefined) { colour = [0, 0, 0]; }
-       
 
-        console.log('Create actor. fieldId: ' + fieldId + 
-                    ', contourVal: ' + contourVal + 
-                    ', colour: ' + colour)
+        console.log('Create actor. fieldId: ' + fieldId +
+          ', contourVal: ' + contourVal +
+          ', colour: ' + colour)
 
         const newAct = vtkActor.newInstance();
         const newMapper = vtkMapper.newInstance();
@@ -429,18 +485,14 @@ if (!data_exists) {
           computeNormals: true,
           mergePoints: true,
         });
-        var thisFieldsReader = vtkHttpDataSetReader.newInstance({ enableArray: true, fetchGzip: true });
-        
+        let thisFieldsReader = vtkHttpDataSetReader.newInstance({ enableArray: true, fetchGzip: true });
+
         actors.push(newAct);
         fieldsReaders.push(thisFieldsReader);
         marchingCubes.push(newMarchingCube);
 
         // Set contour color
         newAct.getProperty().setColor(normalizedColour(colour));
-        console.log('Diffuse: ' + newAct.getProperty().getDiffuse()
-        + ', ambient: ' + newAct.getProperty().getAmbient()
-        + ', specular:' + newAct.getProperty().getSpecular()
-        + ', specularPower: ' + newAct.getProperty().getSpecularPower());
         newAct.setMapper(newMapper);
         newMapper.setInputConnection(newMarchingCube.getOutputPort());
 
@@ -465,16 +517,20 @@ if (!data_exists) {
             }
 
             // Add entry in controller
-            const contourId = actors.length - 1;
+            var contourId;
+            if (id != null) { contourId = id; }
+            else { contourId = actors.length - 1; }
+            console.log('ContourId: ' + contourId + ', id: ' + id);
             let contourList = document.querySelector("#contourListContainer");
 
+            console.log('Colour to hex: ' + colour.toString());
+            console.log(colour);
             const hexColour = rgbToHex(colour[0], colour[1], colour[2]);
 
             let newItem = document.createElement('li');
             newItem.classList = 'list-group-item contourRow';
             newItem.id = 'contourRow' + contourId;
-            // newItem.dataset.contourVal = contourVal;
-            // newItem.dataset.colour = hexColour;
+
             newItem.innerHTML = `<div class="contourMain">
         <span class="dot contourControl" style="background-color: ` + hexColour + `;"></span>
         `+ fieldNames[fieldId] + ` = ` + contourVal.toFixed(2) + `
@@ -483,14 +539,14 @@ if (!data_exists) {
         <button class="btn edit" data-id="`+ contourId + `"
         data-toggle="modal" data-target="#editContour"
           alt="Edit" data-toggle="tooltip" title="Edit"
-          data-contourVal="`+ contourVal +`" data-colour="`+ hexColour 
-          +`" data-id="`+ contourId +`" data-fieldid="` + fieldId + `">
-          <img src="/img/wrench.svg" class="contourControl">
+          data-contourVal="`+ contourVal + `" data-colour="` + hexColour
+              + `" data-id="` + contourId + `" data-fieldid="` + fieldId + `">
+          <img src="` + imgWrench + `" class="contourControl">
       
         </button>
-        <button class="btn" id="delete`+ contourId + `"
-        data-toggle="tooltip" title="Delete">
-          <img src="/img/trash.svg" class="contourControl" alt="Delete">
+        <button class="btn deleteBtn" id="delete`+ contourId + `"
+        data-toggle="tooltip" data-id="`+ contourId + `" title="Delete">
+          <img src="` + imgTrash + `" class="contourControl" alt="Delete">
         </button>
       </div>`;
             console.log('Add new item: ' + newItem);
@@ -500,25 +556,19 @@ if (!data_exists) {
               document.querySelector("#noContours").remove();
             }
             activeContours = activeContours + 1;
+            console.log('Active contours = ' + activeContours);
 
             // Add event listeners for edit and delete
             // const editBtn = document.querySelector("#edit" + contourId);
+            // const delBtn = document.querySelector(".deleteBtn");
             const delBtn = document.querySelector("#delete" + contourId);
-
-            // editBtn.addEventListener('click', function (e) {
-            //   console.log(e.target.id);
-            //   let id = e.target.id.replace('edit', '');
-
-            //   // Create the edit contour dialog
-
-            //   // Setup edit contour dialog
-
-            //   bodyElement.appendChild(addEditContourDiv);
-            // });
+            console.log(delBtn);
 
             delBtn.addEventListener('click', function (e) {
-              console.log(e.target.id);
-              let id = Number(e.target.id.replace('delete', ''));
+              // let id = Number(e.target.id.replace('delete', ''));
+              const id = e.target.dataset.id;
+              console.log('Delete: ' + id);
+
               let row = document.querySelector("#contourRow" + id);
               row.remove();
               let act = actors[id];
@@ -526,26 +576,54 @@ if (!data_exists) {
               renderWindow.render();
 
               activeContours = activeContours - 1;
+              console.log('Active contours = ' + activeContours);
 
               if (activeContours == 0) {
-                // document.querySelector("#noContours").style.display='inline';
                 let contourList = document.querySelector("#contourListContainer");
                 contourList.appendChild(noContoursLi());
               }
+
+              // Find url item and delete
+              const newUrl = location.pathname.replace(getUrlItem(id), '');
+              window.history.pushState({ "html": "", "pageTitle": "" }, "", newUrl);
+
             });
 
 
             newMarchingCube.setContourValue(contourVal);
 
             renderer.addActor(newAct);
-           
+
             renderWindow.render();
+
+            // Update URL 
+            if (addToUrl) {
+              const oldPath = location.pathname;
+              console.log('Old path: ' + oldPath + ', last char: ' + oldPath.charAt(oldPath.length - 1));
+              const newUrl = oldPath + (oldPath.charAt(oldPath.length - 1) == '/' ? '' : '/') +
+                encodeForURL(contourId, fieldId, contourVal, hexColour.replace('#', ''));
+
+              window.history.pushState({ "html": "", "pageTitle": "" }, "", newUrl);
+            }
           });
 
       }
 
-      // createActor(1, 0.99, [0.1, 0.1, 1.0]);
 
+
+
+      console.log('Current actors: ' + actors + ' size: ' + actors.size);
+      const currContours = getCurrentFields();
+      if (currContours &&
+        (actors == null || actors.size == null || actors.size < currContours.size)) {
+        currContours.forEach(function (contour) {
+          if (!location.pathname.includes(encodeForURL(contour.id, contour.fieldId,
+            contour.value, contour.hexColour))) {
+            console.log('Make actor with id' + contour.id);
+            createActor(contour.fieldId, contour.value, hexToRgb(contour.hexColour), false, contour.id);
+          }
+        })
+      }
 
       function resetCameraPosition() {
         renderer.getActiveCamera().set({ position: [-1, -1, 0.6], viewUp: [1, 1, -1] });
@@ -572,9 +650,9 @@ if (!data_exists) {
 
       // Add axis labels a third of the way along each axis
       const smallestAxis = Math.min(domainBox["xLength"], domainBox["yLength"], domainBox["zLength"]);
-      var axisCube = vtkCubeSource.newInstance();
+      let axisCube = vtkCubeSource.newInstance();
       const axisBoxSize = (smallestAxis / 3.0).toFixed(2);
-      var center = origin.map(function (num, idx) {
+      let center = origin.map(function (num, idx) {
         return (num + axisBoxSize / 2).toFixed(3);
       });
       axisCube.setCenter(center);
@@ -582,10 +660,10 @@ if (!data_exists) {
         axisCube.set({ [propertyName]: Number(Number(axisBoxSize).toFixed(3)) });
       });
 
-      var axisLimitsCube = vtkCubeSource.newInstance();
+      let axisLimitsCube = vtkCubeSource.newInstance();
       // const buffer = (smallestAxis*0.1).toFixed(2);
       const buffer = 0;
-      var centerAxLims = domainBox["center"].map(function (num, idx) {
+      let centerAxLims = domainBox["center"].map(function (num, idx) {
         return (num + buffer / 2).toFixed(2);
       });
       axisLimitsCube.setCenter(centerAxLims);
@@ -613,7 +691,7 @@ if (!data_exists) {
             textCtx.textAlign = 'center';
             textCtx.textBaseline = 'middle';
 
-            var text = "";
+            let text = "";
             if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) < accuracy) {
               text = "0";
             }
@@ -626,7 +704,9 @@ if (!data_exists) {
             else if ((pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) < accuracy) {
               text = pdPoint[0].toFixed(2);
             }
+
             textCtx.fillText(text, xy[0], windowHeight - xy[1]);
+
           });
         }
       });
@@ -651,7 +731,7 @@ if (!data_exists) {
             textCtx.textAlign = 'center';
             textCtx.textBaseline = 'middle';
 
-            var text = "";
+            let text = "";
             if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) > accuracy) {
               text = "z";
             }

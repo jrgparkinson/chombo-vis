@@ -3,7 +3,8 @@ deployment:
     # - npm install # should already be done
     - npm run buildProdCPanel
     - export DEPLOYPATH=/home/jrgparki/public_html/vis/
+    - mkdir -p DEPLOYPATH
     - /bin/rm -rf $DEPLOYPATH/dist $DEPLOYPATH/static
     - /bin/cp -r dist $DEPLOYPATH
-    - /bin/cp -r static $DEPLOYPATH
+    - cd static; /bin/cp -r * $DEPLOYPATH; cd ..;
     - /bin/cp -r node_modules $DEPLOYPATH

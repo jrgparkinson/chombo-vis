@@ -1,8 +1,10 @@
 const path = require('path')
 const webpack = require('webpack')
-var vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rules;
+let vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core.rules;
 
 const HtmlWebPackPlugin = require('html-webpack-plugin')
+const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin');
+
 module.exports = {
   entry: {
     main: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000', './src/index.js']
@@ -17,17 +19,6 @@ module.exports = {
   devtool: 'source-map',
   module: {
     rules: [
-    //   {
-    //     enforce: "pre",
-    //     test: /\.js$/,
-    //     exclude: /node_modules/,
-    //     loader: "eslint-loader",
-    //     options: {
-    //       emitWarning: true,
-    //       failOnError: false,
-    //       failOnWarning: false
-    //     }
-    //   },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -40,9 +31,11 @@ module.exports = {
         use: [
           {
             loader: "html-loader",
+            // options : {url : false } // don't resolve urls - allows relative imports
             //options: { minimize: true }
           }
-        ]
+        ]       
+        // exclude: /index\.html$/
       },
       { 
         test: /\.css$/,
@@ -50,16 +43,24 @@ module.exports = {
       },
       {
        test: /\.(png|svg|jpg|gif)$/,
-       use: ['file-loader']
+       use: 'file-loader'
       }
     ].concat(vtkRules)
   },
+  // resolve: {
+  //   alias:{
+  //       "~img": path.resolve("./img")
+  //   },
+  //   extensions: [ '.svg', '.jpg' ]
+  // },
   plugins: [
+    new HtmlWebPackPlugin(),
     new HtmlWebPackPlugin({
       template: "./src/html/index.html",
       filename: "./index.html",
       excludeChunks: [ 'server' ]
     }),
+    new BaseHrefWebpackPlugin({ baseHref: '/' }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin()
   ],
