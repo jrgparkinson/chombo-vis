@@ -157,7 +157,7 @@ def convert_chombo(input_file, output_path):
                         dx=dx)
 
     vtk_boxes = []
-    colours = [[1,1,0],
+    colours = [[0, 0,0],
                [1, 0, 0],
                [0, 1, 0],
                [0, 0, 1]]

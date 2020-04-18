@@ -42,6 +42,10 @@ role="dialog" aria-labelledby="exampleModalCenterTitle"
 
             </div>
             <div class="modal-footer">
+                <ul id="addValidationIssue" class="validationIssue">
+                    <li class="validationContour">Contour value exceeds data range</li>
+                    <li class="validationColour">Colour format must be: rgb(255,255,255)</li>
+                </ul>
                 <button type="button" id="cancelAdContourDialogBtn" class="btn btn-secondary"
                     data-dismiss="modal">Cancel</button>
                 <button type="submit" id="addContourDialogBtn" class="btn btn-primary" data-dismiss="modal">Add</button>

@@ -127,6 +127,28 @@ so we can handle the events */
   z-index:3000;
 }
 
+.validationIssue {
+  float:left;
+  color: firebrick;
+  list-style-type:none;
+  position: absolute;
+  left:0px;
+  margin-top: 0;
+}
+
+.warning {
+  background-color: salmon;
+  border-color: firebrick;
+}
+
+.validationContour {
+  display:none;
+}
+
+.validationColour {
+  display:none;
+}
+
 #loading {
 	position: absolute;
 	top:0;
@@ -151,4 +173,8 @@ so we can handle the events */
 
 #colourValPicker {
   height:100%;
+}
+
+#about {
+  z-index:4000;
 }

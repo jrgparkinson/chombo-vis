@@ -140,8 +140,8 @@ editContourDiv.querySelector("#colourVal").id = 'colourValEdit';
 editContourDiv.querySelector("#colourValPicker").id = 'colourValPickerEdit';
 editContourDiv.querySelector("#addContourDialogValue").id = 'editContourDialogValue';
 editContourDiv.querySelector("#addContourDialogBtn").id = 'editContourDialogBtn';
-editContourDiv.querySelector("#addContourLimits").id = 'editContourLimits';
-
+editContourDiv.querySelector("#addContourLimits").id = 'editContourLimits'; // addValidationIssue
+editContourDiv.querySelector("#addValidationIssue").id = 'editValidationIssue';
 
 bodyElement.appendChild(editContourDiv);
 
