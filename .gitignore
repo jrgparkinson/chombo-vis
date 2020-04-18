@@ -6,3 +6,6 @@ dist/
 *.bak
 .idea/
 .vscode/
+dist/
+static/icons/
+static/*/old

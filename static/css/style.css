@@ -11,6 +11,59 @@
   overflow:hidden;
 }
 
+.menuControl {
+  width:30px;
+  height:30px;
+}
+
+/* disable clicking for images in buttons
+so we can handle the events */
+.btn > * {
+  pointer-events: none;
+}
+
+.btn {
+  padding:5px;
+}
+
+
+.contourRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height:50px;
+}
+
+.noContourRow {
+  padding-top:8px;
+}
+
+
+.contourControls {
+  position: absolute;
+  right:0px;
+}
+.contourMain {
+ position: absolute;
+ left:0px;
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+}
+
+.dot {
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  margin:10px;
+}
+
+.contourControl{
+  height: 25px;
+  width: 25px;
+  margin:5px;
+}
+
 .textCanvas {
   height:100vh;
   display:block;
@@ -42,6 +95,11 @@
   z-index: 2000;
 }
 
+
+.addEditContour { 
+  z-index:3000;
+}
+
 #timeContainer{
   position: absolute;
   bottom: 10px;
@@ -50,6 +108,10 @@
   z-index:2500;
   margin: 0px;
   padding: 0px;
+}
+
+#collapseController {
+  padding-top:0px;
 }
 
 #timeLabel{

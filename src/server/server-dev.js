@@ -18,14 +18,8 @@ app.use(express.static('static'))
 
 app.use(webpackHotMiddleware(compiler))
 
-// app.get('/', (req, res, next) => {
-//   res.send('Hello world');
-// });
-
 app.get('/datafiles', (req, res, next) => {
 
-  // var fs = require('fs');
-  // var data_contents = fs.readdirSync('./static/data/');
   const { readdirSync, statSync } = require('fs')
   const { join } = require('path')
 
@@ -58,8 +52,6 @@ app.get('*', (req, res, next) => {
   res.end()
   })
 })
-
-
 
 const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {

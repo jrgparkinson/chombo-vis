@@ -8,14 +8,6 @@ module.exports = (env, argv) => {
     './src/server/server-prod.js' :
     './src/server/server-dev.js'
 
-   global.appRoot = path.resolve(__dirname);
-  // const SERVER_PATH = (argv.mode === 'production') ?
-  // path.join(__dirname, 'src/server/server-prod.js') :
-  // path.join(__dirname, 'src/server/server-dev.js')
-
-  // console.log("Server path: " + SERVER_PATH);
-  
-
 return ({
     entry: {
       server: SERVER_PATH,
@@ -42,7 +34,11 @@ return ({
           use: {
             loader: "babel-loader"
           }
-        }
+        },
+        {
+          test: /\.svg$/,
+          loader: 'svg-inline-loader'
+      }
       ].concat(vtkRules)
     }
   })
