@@ -1,5 +1,7 @@
 deployment:
   tasks:
+    # - npm install # should already be done
+    - npm run buildProd
     - export DEPLOYPATH=/home/jrgparki/public_html/vis/
     - /bin/rm -rf $DEPLOYPATH/dist $DEPLOYPATH/static
     - /bin/cp -r dist $DEPLOYPATH

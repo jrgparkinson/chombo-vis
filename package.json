@@ -1,8 +1,8 @@
 {
-  "name": "chombojs",
+  "name": "chombo-vis",
   "version": "0.0.1",
   "description": "Visualisation for Chombo AMR data",
-  "main": "src/index.js",
+  "main": "dist/server.js",
   "author": "Jamie Parkinson",
   "license": "BSD-2-Clause",
   "dependencies": {
@@ -1046,17 +1046,12 @@
     "babel-loader": "^8.0.6",
     "css-loader": "^3.2.0",
     "eslint": "^6.5.0",
-    "eslint-loader": "^3.0.2",
     "file-loader": "^4.2.0",
-    "json-loader": "^0.5.7",
     "kw-web-suite": "^9.0.0",
     "mini-css-extract-plugin": "^0.9.0",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
-    "react-inlinesvg": "^1.2.0",
     "style-loader": "^1.0.0",
-    "svg-inline-loader": "^0.8.2",
     "terser-webpack-plugin": "^2.1.2",
-    "uglifyjs-webpack-plugin": "^2.2.0",
     "url-loader": "^2.1.0",
     "webpack-dev-middleware": "^3.7.2",
     "webpack-hot-middleware": "^2.25.0"
