@@ -8,7 +8,6 @@ import vtkRenderer from 'vtk.js/Sources/Rendering/Core/Renderer';
 import vtkCubeSource from 'vtk.js/Sources/Filters/Sources/CubeSource';
 import vtkImageMarchingCubes from 'vtk.js/Sources/Filters/General/ImageMarchingCubes';
 import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper';
-import { ScalarMode } from 'vtk.js/Sources/Rendering/Core/Mapper/Constants';
 import controlPanel from './html/controller.html';
 import about from './html/about.html';
 import addEditContour from './html/addEditContourDialog.html';
