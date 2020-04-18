@@ -1,5 +1,3 @@
-import 'vtk.js/Sources/favicon';
-
 import vtkActor from 'vtk.js/Sources/Rendering/Core/Actor';
 import vtkHttpDataSetReader from 'vtk.js/Sources/IO/Core/HttpDataSetReader';
 import vtkRenderWindowInteractor from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
@@ -203,6 +201,8 @@ if (!data_exists) {
   // $("#fileSelector").modal('show');
 
   // alert('No data exists');
+
+
 
 } else {
 
