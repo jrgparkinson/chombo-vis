@@ -29,7 +29,7 @@ module.exports = {
     //   new OptimizeCSSAssetsPlugin({})
     // ]
     minimize: true,
-    minimizer: [new TerserPlugin(),
+    minimizer: [new TerserPlugin({ parallel: 1 }),
                 new OptimizeCSSAssetsPlugin({})]
   },
   module: {
