@@ -13,6 +13,16 @@ import fileSelector from './html/fileSelector.html';
 import vtkOpenGLRenderWindow from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
 import vtkPixelSpaceCallbackMapper from 'vtk.js/Sources/Rendering/Core/PixelSpaceCallbackMapper';
 
+import * as util from '../static/js/utilities.js';
+import { noContoursLi } from './js/components.js';
+
+//////////////////////////////////////////
+/// Work out what we're going to display
+//////////////////////////////////////////
+const base = util.getBase();
+const data_dir = util.getDataFile();
+
+
 //////////////////////////////
 // Create images
 //////////////////////////////
@@ -27,69 +37,9 @@ document.querySelector(".plusIcon").src = imgPlus;
 document.querySelector(".resetIcon").src = imgReset;
 document.querySelector(".openIcon").src = imgOpen;
 
-////////////////////////////////////////////////
-// Utilities
+//////////////////////////////////////////////////
+// Set up basic html elements
 /////////////////////////////////////////////
-// const OPEN_PATH = 'open';
-
-// function componentToHex(c) {
-//   let hex = c.toString(16);
-//   return hex.length == 1 ? "0" + hex : hex;
-// }
-import { OPEN_PATH } from '../static/js/clientSide';
-import { componentToHex } from '../static/js/utilities.js';
-import { active } from 'promise-inflight';
-
-function rgbToHex(r, g, b) {
-  console.log('To hex: ' + r + '/' + g + '/' + b);
-  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
-
-// Colour converters from  https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
-function hexToRgb(hex) {
-  const hexRgb = require('hex-rgb');
-  return hexRgb(hex, { format: 'array' });
-}
-
-function noContoursLi() {
-  let noContours = document.createElement('li');
-  noContours.id = `noContours`;
-  noContours.classList = 'contourRow noContourRow';
-  noContours.style.display = 'inline';
-  noContours.innerHTML = `<a id="addContourBtn" class="add"
-  data-toggle="modal" data-target="#addContour" alt="Add contour (a)"
-  data-toggle="tooltip" title="Add contour (a)"><img src='` + imgPlus + `' class="contourControl"> Add a contour</a>`;
-  return noContours;
-}
-
-////////////////////////////////////
-// Parse URL
-//////////////////////////////////
-
-
-let qd = {};
-if (location.search) location.search.substr(1).split`&`.forEach(item => { let [k, v] = item.split`=`; v = v && decodeURIComponent(v); (qd[k] = qd[k] || []).push(v) })
-
-// Get pathname minus basename
-let base = '/';
-if (document.getElementsByTagName('base')[0] != null) {
-  base = document.getElementsByTagName('base')[0].getAttribute("href");
-}
-const rel_pathname = location.pathname.replace(base, '')
-let data_dir = '';
-let url_parts = rel_pathname.split('/')
-if (url_parts && url_parts[0] == OPEN_PATH) {
-  data_dir = url_parts[1];
-}
-
-const relative_base_path = '../'.repeat(url_parts.length);
-const relative_data_path = relative_base_path + 'data/'
-
-// console.log(url_parts);
-console.log('Data dir: ' + data_dir + ' from url parts: ' + url_parts);
-// console.log('Relative data path: ' + relative_data_path);
-
-// Set up for text
 const bodyElement = document.querySelector('body');
 let container = document.querySelector('#container');
 if (!container) {
@@ -159,8 +109,6 @@ const fileSelectorDiv = document.querySelector("#fileSelectorContainer");
 fileSelectorDiv.innerHTML = fileSelector;
 
 applyStyle(container, RENDER_STYLE);
-
-
 
 
 // Level outlines
@@ -355,69 +303,21 @@ if (!data_exists) {
 
       function editContour(id, fieldId, value, colour) {
         console.log("Edit contour(" + id + ") field: " + fieldId + ", val: " +
-          value + ", colour: " + colour);
+          value + ", colour: " + colour); 
+
+        console.log('Fields readers: ' + fieldsReaders);
         const newData = fieldsReaders[id].getArrays()[fieldId].array.values;
         fieldsReaders[id].getOutputData().getPointData().getScalars().setData(newData);
-        actors[id].getProperty().setColor(normalizedColour(hexToRgb(colour)));
+        var {r, g, b} = hexToRgb(colour);
+        actors[id].getProperty().setColor(util.normalizedColour([r,g,b]));
         marchingCubes[id].setContourValue(value);
 
         // update url
-        const oldSegment = getUrlItem(id);
-        const newUrl = location.pathname.replace(oldSegment, encodeForURL(id, fieldId, value, colour));
+        const oldSegment = util.getUrlItem(id);
+        const newUrl = location.pathname.replace(oldSegment, util.encodeForURL(id, fieldId, value, colour));
         window.history.pushState({}, "", newUrl);
 
         renderWindow.render();
-      }
-
-      function normalizedColour(colour) {
-        console.log("Make normalized colour of " + colour.toString());
-
-        let max = colour.reduce(function (a, b) { return Math.max(a, b); });
-        let normalizedColour;
-        if (max > 1) { normalizedColour = colour.map(function (item) { return item / 255 }); }
-        else { normalizedColour = colour; }
-        return normalizedColour;
-      }
-
-      function encodeForURL(contourId, fieldId, value, colour) {
-        return contourId + '_' + fieldId + '_' + value + '_' + colour;
-      }
-
-      function getCurrentFields() {
-        // console.log('Searching for contours in url: ' + location.pathname);
-        const reGlobal = /\/(\d+)_(\d+)_(\d+[\.]*[\d]*)_([a-z0-9]+)/g;
-        const re = /\/(\d+)_(\d+)_(\d+[\.]*[\d]*)_([a-z0-9]+)/;
-        const matches = location.pathname.match(reGlobal);
-        // console.log(matches);
-
-        let contours = [];
-        if (matches) {
-          matches.forEach(function (match) {
-            const thisMatch = match.match(re);
-            console.log(thisMatch);
-            contours.push({
-              'id': Number(thisMatch[1]),
-              'fieldId': Number(thisMatch[2]),
-              'value': Number(thisMatch[3]),
-              'hexColour': "#" + thisMatch[4]
-            });
-          })
-          // console.log(contours);
-        }
-        return contours;
-      }
-
-      function getUrlItem(contourId) {
-
-        const re = new RegExp("\/(" + contourId + "_[^/]*)", "g");
-        console.log('Searching in url ' + location.pathname + ' for ' + re);
-        const matches = location.pathname.match(re);
-        console.log(matches);
-        if (matches) {
-          return matches[0];
-        } else {
-          return undefined;
-        }
       }
 
       function addContour() {
@@ -433,9 +333,9 @@ if (!data_exists) {
         createActor(Number(field), Number(value), [Number(rgb[0]), Number(rgb[1]), Number(rgb[2])]);
 
       }
+
       document.querySelector("#addContourDialogBtn").addEventListener('click', addContour);
       document.querySelector("#editContourDialogBtn").addEventListener('click', function (e) {
-        // console.log(e.target);
         const contourId = e.target.dataset.id;
 
         const field = document.querySelector("#field-editContour").value;
@@ -445,11 +345,14 @@ if (!data_exists) {
         editContour(contourId, field, value, colour);
 
       });
-      document.querySelector("#addContour").addEventListener('keypress', function (e) {
+
+      /**
+       * Allow submitting the add contour dialog on enter key press
+       */
+      function submitOnEnter(e) {
         if (e.which == 13) {
-          // addContour();
-          let element = document.querySelector("#addContourDialogBtn");
-          // trigger submit event
+          // let element = document.querySelector("#addContourDialogBtn");
+          let element = document.querySelector('#' + e.target.id + 'DialogBtn');
           let event; // The custom event that will be created
           if (document.createEvent) {
             event = document.createEvent("HTMLEvents");
@@ -463,13 +366,19 @@ if (!data_exists) {
             element.fireEvent("on" + event.eventType, event);
           }
         }
-      });
+      }
+      document.querySelector("#addContour").addEventListener('keypress', submitOnEnter);
+      document.querySelector("#editContour").addEventListener('keypress', submitOnEnter);
 
-      // setField(0);
-      // renderer.addActor(actor);
-
-
-
+      /**
+       * This is the key method for adding contours
+       * 
+       * @param {*} fieldId 
+       * @param {*} contourVal 
+       * @param {*} colour 
+       * @param {*} addToUrl 
+       * @param {*} id 
+       */
       function createActor(fieldId, contourVal, colour, addToUrl, id) {
         if (addToUrl == undefined) { addToUrl = true; }
         if (colour == undefined) { colour = [0, 0, 0]; }
@@ -487,12 +396,15 @@ if (!data_exists) {
         });
         let thisFieldsReader = vtkHttpDataSetReader.newInstance({ enableArray: true, fetchGzip: true });
 
+        
         actors.push(newAct);
         fieldsReaders.push(thisFieldsReader);
         marchingCubes.push(newMarchingCube);
 
+        console.log('Fields readers: ' + fieldsReaders);
+
         // Set contour color
-        newAct.getProperty().setColor(normalizedColour(colour));
+        newAct.getProperty().setColor(util.normalizedColour(colour));
         newAct.setMapper(newMapper);
         newMapper.setInputConnection(newMarchingCube.getOutputPort());
 
@@ -520,36 +432,11 @@ if (!data_exists) {
             var contourId;
             if (id != null) { contourId = id; }
             else { contourId = actors.length - 1; }
-            console.log('ContourId: ' + contourId + ', id: ' + id);
             let contourList = document.querySelector("#contourListContainer");
 
-            console.log('Colour to hex: ' + colour.toString());
-            console.log(colour);
-            const hexColour = rgbToHex(colour[0], colour[1], colour[2]);
+            const hexColour = util.rgbToHex(colour[0], colour[1], colour[2]);
 
-            let newItem = document.createElement('li');
-            newItem.classList = 'list-group-item contourRow';
-            newItem.id = 'contourRow' + contourId;
-
-            newItem.innerHTML = `<div class="contourMain">
-        <span class="dot contourControl" style="background-color: ` + hexColour + `;"></span>
-        `+ fieldNames[fieldId] + ` = ` + contourVal.toFixed(2) + `
-      </div>
-      <div class="contourControls">
-        <button class="btn edit" data-id="`+ contourId + `"
-        data-toggle="modal" data-target="#editContour"
-          alt="Edit" data-toggle="tooltip" title="Edit"
-          data-contourVal="`+ contourVal + `" data-colour="` + hexColour
-              + `" data-id="` + contourId + `" data-fieldid="` + fieldId + `">
-          <img src="` + imgWrench + `" class="contourControl">
-      
-        </button>
-        <button class="btn deleteBtn" id="delete`+ contourId + `"
-        data-toggle="tooltip" data-id="`+ contourId + `" title="Delete">
-          <img src="` + imgTrash + `" class="contourControl" alt="Delete">
-        </button>
-      </div>`;
-            console.log('Add new item: ' + newItem);
+            let newItem = createContourLi(contourId, hexColour, fieldNames, fieldId, contourVal);
             contourList.appendChild(newItem);
 
             if (activeContours == 0) {
@@ -565,7 +452,6 @@ if (!data_exists) {
             console.log(delBtn);
 
             delBtn.addEventListener('click', function (e) {
-              // let id = Number(e.target.id.replace('delete', ''));
               const id = e.target.dataset.id;
               console.log('Delete: ' + id);
 
@@ -584,7 +470,7 @@ if (!data_exists) {
               }
 
               // Find url item and delete
-              const newUrl = location.pathname.replace(getUrlItem(id), '');
+              const newUrl = location.pathname.replace(util.getUrlItem(id), '');
               window.history.pushState({ "html": "", "pageTitle": "" }, "", newUrl);
 
             });
@@ -601,7 +487,7 @@ if (!data_exists) {
               const oldPath = location.pathname;
               console.log('Old path: ' + oldPath + ', last char: ' + oldPath.charAt(oldPath.length - 1));
               const newUrl = oldPath + (oldPath.charAt(oldPath.length - 1) == '/' ? '' : '/') +
-                encodeForURL(contourId, fieldId, contourVal, hexColour.replace('#', ''));
+              util.encodeForURL(contourId, fieldId, contourVal, hexColour.replace('#', ''));
 
               window.history.pushState({ "html": "", "pageTitle": "" }, "", newUrl);
             }
@@ -609,18 +495,16 @@ if (!data_exists) {
 
       }
 
-
-
-
       console.log('Current actors: ' + actors + ' size: ' + actors.size);
-      const currContours = getCurrentFields();
+      const currContours = util.getCurrentFields();
       if (currContours &&
         (actors == null || actors.size == null || actors.size < currContours.size)) {
         currContours.forEach(function (contour) {
-          if (!location.pathname.includes(encodeForURL(contour.id, contour.fieldId,
+          if (!location.pathname.includes(util.encodeForURL(contour.id, contour.fieldId,
             contour.value, contour.hexColour))) {
             console.log('Make actor with id' + contour.id);
-            createActor(contour.fieldId, contour.value, hexToRgb(contour.hexColour), false, contour.id);
+            let {r,g,b} = util.hexToRgb(contour.hexColour);
+            createActor(contour.fieldId, contour.value, [r,g,b], false, contour.id);
           }
         })
       }
@@ -632,141 +516,17 @@ if (!data_exists) {
         renderWindow.render();
       }
 
-      const resetCamera = document.querySelector("#resetCamera");
-      resetCamera.addEventListener('click', (e) => {
+
+      document.querySelector("#resetCamera").addEventListener('click', (e) => {
         resetCameraPosition();
       });
 
       resetCameraPosition();
 
-
       ////////////////////////////////////////////////////////////////
       // Text
       ////////////////////////////////////////////////////////////////
-
-      // Get first element for now
-      // const data = fieldsReader.getOutputData();
-      const origin = fieldsReader.getOutputData().getOrigin();
-
-      // Add axis labels a third of the way along each axis
-      const smallestAxis = Math.min(domainBox["xLength"], domainBox["yLength"], domainBox["zLength"]);
-      let axisCube = vtkCubeSource.newInstance();
-      const axisBoxSize = (smallestAxis / 3.0).toFixed(2);
-      let center = origin.map(function (num, idx) {
-        return (num + axisBoxSize / 2).toFixed(3);
-      });
-      axisCube.setCenter(center);
-      ['xLength', 'yLength', 'zLength'].forEach((propertyName) => {
-        axisCube.set({ [propertyName]: Number(Number(axisBoxSize).toFixed(3)) });
-      });
-
-      let axisLimitsCube = vtkCubeSource.newInstance();
-      // const buffer = (smallestAxis*0.1).toFixed(2);
-      const buffer = 0;
-      let centerAxLims = domainBox["center"].map(function (num, idx) {
-        return (num + buffer / 2).toFixed(2);
-      });
-      axisLimitsCube.setCenter(centerAxLims);
-      ['xLength', 'yLength', 'zLength'].forEach((propertyName) => {
-        const val = Number(domainBox[propertyName]) + Number(buffer);
-        axisLimitsCube.set({ [propertyName]: Number(val.toFixed(2)) });
-      });
-
-      const accuracy = smallestAxis / 10;
-
-      const psMapper = vtkPixelSpaceCallbackMapper.newInstance();
-      // psMapper.setInputData(pipelines[0].cubeSource.getOutputData());
-      psMapper.setInputData(axisLimitsCube.getOutputData());
-      psMapper.setUseZValues(true);
-      psMapper.setCallback((coordsList, camera, aspect, depthBuffer) => {
-        if (textCtx && windowWidth > 0 && windowHeight > 0) {
-          const dataPoints = psMapper.getInputData().getPoints();
-
-          textCtx.clearRect(0, 0, windowWidth, windowHeight);
-
-          coordsList.forEach((xy, idx) => {
-            const pdPoint = dataPoints.getPoint(idx);
-            textCtx.font = '32px serif';
-            textCtx.color = 'black';
-            textCtx.textAlign = 'center';
-            textCtx.textBaseline = 'middle';
-
-            let text = "";
-            if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) < accuracy) {
-              text = "0";
-            }
-            else if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[1] - origin[1]) < accuracy) {
-              text = pdPoint[2].toFixed(2);
-            }
-            else if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[2] - origin[2]) < accuracy) {
-              text = pdPoint[1].toFixed(2);
-            }
-            else if ((pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) < accuracy) {
-              text = pdPoint[0].toFixed(2);
-            }
-
-            textCtx.fillText(text, xy[0], windowHeight - xy[1]);
-
-          });
-        }
-      });
-      const textActor = vtkActor.newInstance();
-      textActor.setMapper(psMapper);
-      renderer.addActor(textActor);
-
-
-      // Axis labels (should work out how to refactor this and code above)
-      // axisCube
-      const psMapperXYZ = vtkPixelSpaceCallbackMapper.newInstance();
-      psMapperXYZ.setInputData(axisCube.getOutputData());
-      psMapperXYZ.setUseZValues(true);
-      psMapperXYZ.setCallback((coordsList, camera, aspect, depthBuffer) => {
-        if (textCtx && windowWidth > 0 && windowHeight > 0) {
-          const dataPoints = psMapperXYZ.getInputData().getPoints();
-
-          coordsList.forEach((xy, idx) => {
-            const pdPoint = dataPoints.getPoint(idx);
-            textCtx.font = '32px serif';
-            textCtx.color = 'black';
-            textCtx.textAlign = 'center';
-            textCtx.textBaseline = 'middle';
-
-            let text = "";
-            if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) > accuracy) {
-              text = "z";
-            }
-            else if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[2] - origin[2]) < accuracy && (pdPoint[1] - origin[1]) > accuracy) {
-              text = "y";
-            }
-            else if ((pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) < accuracy && (pdPoint[0] - origin[0]) > accuracy) {
-              text = "x";
-            }
-            textCtx.fillText(text, xy[0], windowHeight - xy[1]);
-          });
-        }
-      });
-      const textActorXYZ = vtkActor.newInstance();
-      textActorXYZ.setMapper(psMapperXYZ);
-      renderer.addActor(textActorXYZ);
-
-      // ----------------------------------------------------------------------------
-      // Use OpenGL as the backend to view the all this
-      // ----------------------------------------------------------------------------
-
-      const openglRenderWindow = vtkOpenGLRenderWindow.newInstance();
-      openglRenderWindow.setContainer(container);
-      renderWindow.addView(openglRenderWindow);
-
-      const textCanvas = document.createElement('canvas');
-      textCanvas.classList.add('textCanvas'); //style.container
-      container.appendChild(textCanvas);
-      textCtx = textCanvas.getContext('2d');
-
-      const interactor = vtkRenderWindowInteractor.newInstance();
-      interactor.setView(openglRenderWindow);
-      interactor.initialize();
-      interactor.bindEvents(container);
-      interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
+      const { openglRenderWindow, textCanvas } = addAxisLimitsAndLabels(fieldsReader, domainBox);
 
       // Handle window resize
       function resize() {
@@ -782,6 +542,7 @@ if (!data_exists) {
         console.log("Window height: " + windowHeight + ", width: " + windowWidth);
         renderWindow.render();
       }
+      
       window.addEventListener('resize', resize);
       resize();
 
@@ -798,12 +559,143 @@ if (!data_exists) {
     });
 
 
-
-  // global.actor = actor;
-  // global.mapper = mapper;
-  // global.marchingCube = marchingCube;
-
 } // end if data exists
+
+
+
+
+function createContourLi(contourId, hexColour, fieldNames, fieldId, contourVal) {
+  let newItem = document.createElement('li');
+  newItem.classList = 'list-group-item contourRow';
+  newItem.id = 'contourRow' + contourId;
+  newItem.innerHTML = `<div class="contourMain">
+        <span class="dot contourControl" style="background-color: ` + hexColour + `;"></span>
+        ` + fieldNames[fieldId] + ` = ` + contourVal.toFixed(2) + `
+      </div>
+      <div class="contourControls">
+        <button class="btn edit" data-id="` + contourId + `"
+        data-toggle="modal" data-target="#editContour"
+          alt="Edit" data-toggle="tooltip" title="Edit"
+          data-contourVal="` + contourVal + `" data-colour="` + hexColour
+    + `" data-id="` + contourId + `" data-fieldid="` + fieldId + `">
+          <img src="` + imgWrench + `" class="contourControl">
+      
+        </button>
+        <button class="btn deleteBtn" id="delete` + contourId + `"
+        data-toggle="tooltip" data-id="` + contourId + `" title="Delete">
+          <img src="` + imgTrash + `" class="contourControl" alt="Delete">
+        </button>
+      </div>`;
+  return newItem;
+}
+
+function addAxisLimitsAndLabels(fieldsReader, domainBox) {
+  const origin = fieldsReader.getOutputData().getOrigin();
+  // Add axis labels a third of the way along each axis
+  const smallestAxis = Math.min(domainBox["xLength"], domainBox["yLength"], domainBox["zLength"]);
+  let axisCube = vtkCubeSource.newInstance();
+  const axisBoxSize = (smallestAxis / 3.0).toFixed(2);
+  let center = origin.map(function (num, idx) {
+    return (num + axisBoxSize / 2).toFixed(3);
+  });
+  axisCube.setCenter(center);
+  ['xLength', 'yLength', 'zLength'].forEach((propertyName) => {
+    axisCube.set({ [propertyName]: Number(Number(axisBoxSize).toFixed(3)) });
+  });
+  let axisLimitsCube = vtkCubeSource.newInstance();
+  // const buffer = (smallestAxis*0.1).toFixed(2);
+  const buffer = 0;
+  let centerAxLims = domainBox["center"].map(function (num, idx) {
+    return (num + buffer / 2).toFixed(2);
+  });
+  axisLimitsCube.setCenter(centerAxLims);
+  ['xLength', 'yLength', 'zLength'].forEach((propertyName) => {
+    const val = Number(domainBox[propertyName]) + Number(buffer);
+    axisLimitsCube.set({ [propertyName]: Number(val.toFixed(2)) });
+  });
+  const accuracy = smallestAxis / 10;
+  const textActorLimits = makeAxisLabels(axisLimitsCube, origin, accuracy, makeAxisLimitLabels, true);
+  renderer.addActor(textActorLimits);
+  const textActorXYZ = makeAxisLabels(axisCube, origin, accuracy, makeXYZLabels, false);
+  renderer.addActor(textActorXYZ);
+  // ----------------------------------------------------------------------------
+  // Use OpenGL as the backend to view the all this
+  // ----------------------------------------------------------------------------
+  const openglRenderWindow = vtkOpenGLRenderWindow.newInstance();
+  openglRenderWindow.setContainer(container);
+  renderWindow.addView(openglRenderWindow);
+  const textCanvas = document.createElement('canvas');
+  textCanvas.classList.add('textCanvas'); //style.container
+  container.appendChild(textCanvas);
+  textCtx = textCanvas.getContext('2d');
+  const interactor = vtkRenderWindowInteractor.newInstance();
+  interactor.setView(openglRenderWindow);
+  interactor.initialize();
+  interactor.bindEvents(container);
+  interactor.setInteractorStyle(vtkInteractorStyleTrackballCamera.newInstance());
+  return { openglRenderWindow, textCanvas };
+}
+
+function makeXYZLabels(pdPoint, origin, accuracy) {
+  let text = "";
+  
+  if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) > accuracy) {
+    text = "z";
+  }
+  else if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[2] - origin[2]) < accuracy && (pdPoint[1] - origin[1]) > accuracy) {
+    text = "y";
+  }
+  else if ((pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) < accuracy && (pdPoint[0] - origin[0]) > accuracy) {
+    text = "x";
+  }
+  return text;
+}
+
+function makeAxisLimitLabels(pdPoint, origin, accuracy) {
+  let text = "";
+  
+  if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) < accuracy) {
+    text = "0";
+  }
+  else if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[1] - origin[1]) < accuracy) {
+    text = pdPoint[2].toFixed(2);
+  }
+  else if ((pdPoint[0] - origin[0]) < accuracy && (pdPoint[2] - origin[2]) < accuracy) {
+    text = pdPoint[1].toFixed(2);
+  }
+  else if ((pdPoint[1] - origin[1]) < accuracy && (pdPoint[2] - origin[2]) < accuracy) {
+    text = pdPoint[0].toFixed(2);
+  }
+  return text;
+}
+
+
+function makeAxisLabels(axisCube, origin, accuracy, textFunction, clearCanvas) {
+  const psMapperXYZ = vtkPixelSpaceCallbackMapper.newInstance();
+  psMapperXYZ.setInputData(axisCube.getOutputData());
+  psMapperXYZ.setUseZValues(true);
+  psMapperXYZ.setCallback((coordsList, camera, aspect, depthBuffer) => {
+    if (textCtx && windowWidth > 0 && windowHeight > 0) {
+      const dataPoints = psMapperXYZ.getInputData().getPoints();
+
+      if (clearCanvas) { textCtx.clearRect(0, 0, windowWidth, windowHeight); }
+
+      coordsList.forEach((xy, idx) => {
+        const pdPoint = dataPoints.getPoint(idx);
+        textCtx.font = '32px serif';
+        textCtx.color = 'black';
+        textCtx.textAlign = 'center';
+        textCtx.textBaseline = 'middle';
+        const text = textFunction(pdPoint, origin, accuracy);
+        textCtx.fillText(text, xy[0], windowHeight - xy[1]);
+      });
+    }
+  });
+  const textActorXYZ = vtkActor.newInstance();
+  textActorXYZ.setMapper(psMapperXYZ);
+  return textActorXYZ;
+}
+
 
 if (typeof (module.hot) !== 'undefined') {
   module.hot.accept() // eslint-disable-line no-undef

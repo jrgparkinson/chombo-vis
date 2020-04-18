@@ -1,12 +1,15 @@
 
 const colourRegex = /^rgb\(\d{1,3},\d{1,3},\d{1,3}\)$/
 const numberRegex = /^[0-9\.e+-]+$/
+const allowedKeys = [13, // enter
+                    8] // backspace
 
 function validateContourVal(e) {
     var str = String.fromCharCode(e.keyCode);
     console.log(e.keyCode+ ', ' + str);
 
-    if (!/[0-9\.e+-]+/.test(str) && e.keyCode != 8) {
+    // Allow backspace (8) and enter (13)
+    if (!/[0-9\.e+-]+/.test(str) && e.keyCode != 8 && e.keyCode != 13) {
         return false;
     }
 }

@@ -1,15 +1,12 @@
-export const OPEN_PATH = 'open';
-export const DATAFILES_PATH = 'datafiles';
 
+import {hexToRgb, rgbToHex, getDataFile, getBase, 
+  getDataPath, OPEN_PATH, DATAFILES_PATH} from './utilities.js'; 
+ 
 var metadata;
 
-function getBase() {
-  if ($("base") && $("base").attr("href")) {
-    return $("base").attr("href");
-  } else {
-    return '/';
-  }
-}
+/**
+ * Mostly event handlers
+ */
 
 function populateFileList() {
 
@@ -46,50 +43,6 @@ function populateFileList() {
   });
 }
 
-function getDataFile() {
-  let data_dir = '';
-  const rel_url = window.location.pathname.replace(getBase(), '');
-  const url_parts = rel_url.split('/')
-  if (url_parts && url_parts[0] == OPEN_PATH) {
-    data_dir = url_parts[1];
-  }
-  console.log('Data dir: ' + data_dir);
-  return data_dir
-}
-
-/* e.g. /data/3d-amr
-   or /vis/data/3d-amr
-*/
-function getDataPath() {
-  return getBase() + 'data/' + getDataFile();
-}
-
-
-
-// Colour converters from  https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
-function hexToRgb(hex) {
-  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  let fullHex = hex.replace(shorthandRegex, function (m, r, g, b) {
-    return r + r + g + g + b + b;
-  });
-
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
-}
-
-function componentToHex(c) {
-  var hex = c.toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
-}
-
-function rgbToHex(r, g, b) {
-  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
 
 // Sets RGB string from hex code selected
 function updateColourInput(inputId, hex) {
