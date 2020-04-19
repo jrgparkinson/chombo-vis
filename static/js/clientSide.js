@@ -80,6 +80,7 @@ function updateColourPicker() {
 function printFieldLimits(fieldInput, limitsId) {
   if (fieldInput == undefined) { fieldInput = "#field-addContour"; }
   if (limitsId == undefined) { limitsId = "#addContourLimits" }
+  console.log('Add field limits for ' + fieldInput + ' at ' + limitsId)
   var field = $(fieldInput + " option:selected").text();
 
   var limits;
@@ -156,9 +157,9 @@ $(document).ready(function () {
 
 $("#fileSelector").on('shown.bs.modal', populateFileList);
 $("#colourVal").on('keyup', updateColourPicker);
-$("#field-addContour").on('change', printFieldLimits);
-$("#addContourBtn").on('click', printFieldLimits);
-$("#field-addContour").on('change', printFieldLimits);
+// $("#field-addContour").on('change', printFieldLimits);
+// $("#addContourBtn").on('click', printFieldLimits);
+$("#field-addContour").on('change', function() {printFieldLimits()});
 
 $("#field-editContour").on('change', function () {
   printFieldLimits("#field-editContour", "#editContourLimits");

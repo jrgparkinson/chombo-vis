@@ -16,6 +16,8 @@ import vtkPixelSpaceCallbackMapper from 'vtk.js/Sources/Rendering/Core/PixelSpac
 import * as util from '../static/js/utilities.js';
 import { noContoursLi } from './js/components.js';
 
+import './js/favicon.js';
+
 //////////////////////////////////////////
 /// Work out what we're going to display
 //////////////////////////////////////////
