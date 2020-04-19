@@ -10,7 +10,7 @@ module.exports = (env, argv) => {
     './src/server/server-prod.js' :
     './src/server/server-dev.js'
   const PUBLIC_PATH = (argv.mode === 'production') ? 'vis/' : '/'
-  const DELIVER_PATH = (argv.mode === 'production') ? 'vis/dist' : 'dist'
+  const DELIVER_PATH = (argv.mode === 'production') ? 'vis' : 'dist'
 
 
 return ({

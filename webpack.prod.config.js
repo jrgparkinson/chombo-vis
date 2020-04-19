@@ -11,7 +11,7 @@ module.exports = {
     main: './src/index.js'
   },
   output: {
-    path: path.join(__dirname, 'vis', 'dist'),
+    path: path.join(__dirname, 'vis'),
     publicPath: '/', //  '/vis/',
     filename: '[name].js'
   },
