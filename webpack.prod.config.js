@@ -19,8 +19,9 @@ module.exports = {
   devtool: 'source-map',
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin({ parallel: 1 }),
+    minimizer: [ // new TerserPlugin({ parallel: 1 }), // turn this off - runs out of memory on prod
                 new OptimizeCSSAssetsPlugin({})]
+    // splitChunks: { chunks: 'all',  }
   },
   module: {
     rules: [
