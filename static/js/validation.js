@@ -18,30 +18,38 @@ function validateContourValRange(e) {
     console.log(e);
 
     var inputId = e.currentTarget.id;
-    var limitsId = inputId.replace('DialogValue', 'Limits');
+    let addOrEdit = '';
+
+    if (inputId.includes('field')) { addOrEdit = inputId.replace('field-', '').replace('Contour', ''); }
+    else {addOrEdit = inputId.replace('ContourDialogValue', ''); }
+    // var limitsId = inputId.replace('DialogValue', 'Limits');
+    var limitsId = addOrEdit + 'ContourLimits';
+    var warningId = addOrEdit + 'ValidationIssue';
+    var submitButtonId = addOrEdit + 'ContourDialogBtn';
+    var contourValId = '#' + addOrEdit + 'ContourDialogValue';
 
     range = $('#' + limitsId)[0];
     minMax = range.innerHTML.match(/Min:\s+(.*)\<br\>.*Max:\s+(.*)/)
 
-    let warningId = inputId.replace('ContourDialogValue', 'ValidationIssue');
-
-    let submitButtonId = inputId.replace('Value', 'Btn');
+    // let warningId = inputId.replace('ContourDialogValue', 'ValidationIssue');
+    // let submitButtonId = inputId.replace('Value', 'Btn');
 
     console.log('Set submit button: ' + submitButtonId);
 
     // console.log('Value ' + $('#addContourDialogValue').val() + ' range: [' + Number(minMax[1]) + ',' +
     //                  Number(minMax[2]) + ']' )
-    if ($('#' + inputId).val() < Number(minMax[1])
-    || $('#' + inputId).val() > Number(minMax[2]) ) {
+
+    if ($(contourValId).val() < Number(minMax[1])
+    || $(contourValId).val() > Number(minMax[2]) ) {
         console.log('Value exceeds data range');
-        $('#' + inputId).css('background-color', 'salmon');
-        $('#' + inputId).css('border-color', 'firebrick');
+        $(contourValId).css('background-color', 'salmon');
+        $(contourValId).css('border-color', 'firebrick');
         $('.validationContour').css({"display":"list-item"});
         console.log('Set div: ' + warningId);
         $('#' + submitButtonId).prop('disabled', true);
     } else {
-        $('#' + inputId).css('background-color', '');
-        $('#' + inputId).css('border-color', '');
+        $(contourValId).css('background-color', '');
+        $(contourValId).css('border-color', '');
         $('.validationContour').css({"display":"none"});
         $('#' + submitButtonId).prop('disabled', false);
     }
@@ -77,6 +85,8 @@ $(document).ready(function(){
 
     $('#editContourDialogValue').keypress(validateContourVal);
     $("#editContourDialogValue").keyup(validateContourValRange);
+
+    $('.fieldNameSelect').change(validateContourValRange);
 
     // Colour fields
     $('#colourVal').keyup(validateRGBColour);

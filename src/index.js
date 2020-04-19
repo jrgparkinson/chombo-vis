@@ -310,7 +310,7 @@ if (!data_exists) {
         console.log('Fields readers: ' + fieldsReaders);
         const newData = fieldsReaders[id].getArrays()[fieldId].array.values;
         fieldsReaders[id].getOutputData().getPointData().getScalars().setData(newData);
-        var {r, g, b} = hexToRgb(colour);
+        var {r, g, b} = util.hexToRgb(colour);
         actors[id].getProperty().setColor(util.normalizedColour([r,g,b]));
         marchingCubes[id].setContourValue(value);
 
@@ -525,15 +525,11 @@ if (!data_exists) {
       function resetCameraPosition() {
 
         // If width or height is much larger than the other, zoom out more
-        console.log(domainBox["zLength"] + ","+ domainBox["xLength"] + "," +domainBox["yLength"]);
         let dataRatio = domainBox["zLength"] / (Math.max(domainBox["xLength"], domainBox["yLength"]));
         let screenRatio = window.innerHeight/window.innerWidth;
         if (screenRatio < 1) { screenRatio = 1/screenRatio; dataRatio = 1/dataRatio; };
 
-        console.log("ScreenRatio: " + screenRatio + ", data ratio: " + dataRatio);
-
         const cameraPos = { position: [-1.75, -1.75, 1.75].map(function(val) {
-          console.log("sc/da " + (screenRatio/dataRatio) )
           return val*(screenRatio/dataRatio);
         } ), 
           viewUp: [1, 1, 1], 
