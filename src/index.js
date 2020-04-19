@@ -511,10 +511,36 @@ if (!data_exists) {
         })
       }
 
+      function getDataCenter() {
+        const origin = fieldsReader.getOutputData().getOrigin();
+        const domainLengths = [domainBox["xLength"],domainBox["yLength"], domainBox["zLength"]];
+        let center = domainLengths.map(function(lengthDir, idx) {
+          return origin[idx] + lengthDir/2;
+        })
+        return center;
+
+      }
+
+
       function resetCameraPosition() {
-        renderer.getActiveCamera().set({ position: [-1, -1, 0.6], viewUp: [1, 1, -1] });
-        renderer.getActiveCamera().zoom(1.0);
-        renderer.resetCamera();
+
+        // If width or height is much larger than the other, zoom out more
+        console.log(domainBox["zLength"] + ","+ domainBox["xLength"] + "," +domainBox["yLength"]);
+        let dataRatio = domainBox["zLength"] / (Math.max(domainBox["xLength"], domainBox["yLength"]));
+        let screenRatio = window.innerHeight/window.innerWidth;
+        if (screenRatio < 1) { screenRatio = 1/screenRatio; dataRatio = 1/dataRatio; };
+
+        console.log("ScreenRatio: " + screenRatio + ", data ratio: " + dataRatio);
+
+        const cameraPos = { position: [-1.75, -1.75, 1.75].map(function(val) {
+          console.log("sc/da " + (screenRatio/dataRatio) )
+          return val*(screenRatio/dataRatio);
+        } ), 
+          viewUp: [1, 1, 1], 
+          focalPoint: getDataCenter(),}
+        
+        // renderer.getActiveCamera().set({ position: [-1, -1, 0.6], viewUp: [1, 1, -1] });
+        renderer.getActiveCamera().set(cameraPos);
         renderWindow.render();
       }
 
@@ -524,6 +550,7 @@ if (!data_exists) {
       });
 
       resetCameraPosition();
+      
 
       ////////////////////////////////////////////////////////////////
       // Text
@@ -556,7 +583,13 @@ if (!data_exists) {
         }
       });
 
+
+     
+
       document.querySelector("#loading").style.display = 'none';
+
+
+      
 
     });
 
@@ -684,7 +717,10 @@ function makeAxisLabels(axisCube, origin, accuracy, textFunction, clearCanvas) {
 
       coordsList.forEach((xy, idx) => {
         const pdPoint = dataPoints.getPoint(idx);
-        textCtx.font = '32px serif';
+
+        let fontSize = 32;
+        if (window.innerWidth < 600) { fontSize = 24; }
+        textCtx.font = fontSize + 'px serif';
         textCtx.color = 'black';
         textCtx.textAlign = 'center';
         textCtx.textBaseline = 'middle';
