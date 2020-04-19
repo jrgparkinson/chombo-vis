@@ -1030,18 +1030,16 @@
   },
   "scripts": {
     "heroku-prebuild": "npm install --dev",
-    "build-old": "webpack --progress --colors --mode development",
-    "build:release": "webpack --progress --colors --mode production",
-    "start-heroku": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --content-base ./dist",
+    "start-heroku": "node ./vis/dist/server.js",
     "commit": "git cz",
     "semantic-release": "semantic-release",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && webpack --mode development --config webpack.server.config.js && webpack --mode development",
+    "build": "rm -rf dist && webpack --mode production --config webpack.server.config.js && webpack --mode production --config webpack.prod.config.js",
     "buildDev": "rm -rf dist && webpack --mode development --config webpack.server.config.js && webpack --mode development --config webpack.dev.config.js",
     "buildProd": "rm -rf dist && webpack --mode production --config webpack.server.config.js && webpack --mode production --config webpack.prod.config.js",
     "buildProdCPanel": "rm -rf dist && node_modules/webpack/bin/webpack.js --mode production --config webpack.server.config.js && node_modules/webpack/bin/webpack.js --mode production --config webpack.prod.config.js",
-    "start": "node ./dist/server.js",
-    "startProd": "node ./vis/dist/server.js"
+    "startDev": "node ./dist/server.js",
+    "start": "node ./vis/dist/server.js"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
