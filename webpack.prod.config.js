@@ -6,13 +6,13 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const TerserPlugin = require('terser-webpack-plugin');
 const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-module.exports = {
+module.exports = env => ({
   entry: {
     main: './src/index.js'
   },
   output: {
     path: path.join(__dirname, 'vis'),
-    publicPath: '/', //  '/vis/',
+    publicPath: (env && env.cpanel) ? '/vis/' : '/', //  '/vis/',
     filename: '[name].js'
   },
   target: 'web',
@@ -71,4 +71,4 @@ module.exports = {
       chunkFilename: "[id].css"
     })
   ]
-}
+})
