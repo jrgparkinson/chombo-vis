@@ -401,7 +401,7 @@
     "http-deceiver": "1.2.7",
     "http-errors": "1.7.2",
     "http-parser-js": "0.4.10",
-    "http-proxy": "1.18.0",
+    "http-proxy": "1.18.1",
     "http-proxy-agent": "3.0.0",
     "http-proxy-middleware": "0.19.1",
     "https-browserify": "1.0.0",
