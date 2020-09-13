@@ -1024,7 +1024,7 @@
     "y18n": "4.0.0",
     "yallist": "3.1.1",
     "yargs": "4.8.1",
-    "yargs-parser": "2.4.1",
+    "yargs-parser": "13.1.2",
     "yauzl": "2.10.0",
     "yeast": "0.1.2"
   },
