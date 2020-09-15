@@ -11,7 +11,7 @@ module.exports = env => ({
     main: './src/index.js'
   },
   output: {
-    path: path.join(__dirname, 'vis'),
+    path: path.join(__dirname, 'vis', 'dist'),
     publicPath: (env && env.cpanel) ? '/vis/' : '/', //  '/vis/',
     filename: '[name].js'
   },
