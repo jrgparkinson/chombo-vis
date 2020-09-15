@@ -1,6 +1,12 @@
-# chombo-vis
-Web app for visualising Chombo AMR data
+# Chombo Vis
+A node.js web app for visualising Chombo AMR data.
 
+To run locally:
+```console
+$ npm install
+$ npm run build
+$ npm start
+```
 
 
 # Python conversion
