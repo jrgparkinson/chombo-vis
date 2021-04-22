@@ -1,0 +1,3 @@
+[submodule "vtk-js"]
+	path = vtk-js
+	url = https://github.com/Kitware/vtk-js
