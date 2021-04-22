@@ -611,7 +611,7 @@
     "node-ipc": "9.1.1",
     "node-libs-browser": "2.2.1",
     "node-modules-regexp": "1.0.0",
-    "node-notifier": "5.4.3",
+    "node-notifier": "8.0.1",
     "node-releases": "1.1.53",
     "normalize-package-data": "2.5.0",
     "normalize-path": "3.0.0",
