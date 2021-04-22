@@ -1,12 +1,15 @@
-from pyevtk.hl import imageToVTK, linesToVTK
 
-import numpy as np
+from pathlib import Path
+import argparse
 import subprocess
 import os
 import json
+import numpy as np
+from pyevtk.hl import imageToVTK, linesToVTK
 from chombopy.plotting import PltFile
-from pathlib import Path
-import argparse
+
+# This script relies on some files from vtk-js, included as a submodule to this repo
+VTK_ROOT = repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/vtk-js"
 
 def create_http_dataset(output_dir, filename, cell_data, point_data, dx):
     """
@@ -31,6 +34,9 @@ def create_http_dataset(output_dir, filename, cell_data, point_data, dx):
 
     finest_refinement = 0 # TODO
 
+    for field, data in point_data.items():
+        point_data[field] = np.ascontiguousarray(data)
+
     actual_num_cells = 1/dx - 2*finest_refinement
     scaled_dx = 1/actual_num_cells
     temp_filename = imageToVTK(vti_file, cellData=cell_data, pointData=point_data,
@@ -41,10 +47,10 @@ def create_http_dataset(output_dir, filename, cell_data, point_data, dx):
 
 
 def data_converter(vti_file, output_dir):
-    # TODO: find this path properly (currently hardcoded)
-    data_converter = "../../vtk-js/Utilities/DataGenerator/vtk-data-converter.py"
+    # This comes from the vtk-js submodule
+    data_converter = VTK_ROOT + "/Utilities/DataGenerator/vtk-data-converter.py"
 
-    cmd = "pvpython %s  --input %s --output %s" % (data_converter, vti_file, output_dir)
+    cmd = "pvpython %s --input %s --output %s" % (data_converter, vti_file, output_dir)
     print(cmd)
     subprocess.run(cmd,  shell=True)
 
@@ -58,7 +64,7 @@ def create_example_dataset(path, name):
     pressure = np.random.rand(ncells).reshape((nx, ny, nz), order='C')
     temp = np.random.rand(npoints).reshape((nx + 1, ny + 1, nz + 1))
 
-    create_http_dataset(path, name, {"pressure": pressure}, {"temp": temp})
+    create_http_dataset(path, name, {"pressure": pressure}, {"temp": temp}, 1/nx)
 
 
 def get_finest_ref(data):
@@ -79,7 +85,7 @@ def get_amr_dataset(data):
 
     finest_ref = get_finest_ref(data)
 
-    finest_data = data.ds_levels[finest_level].drop(['i', 'j', 'k', 'level'])
+    finest_data = data.ds_levels[finest_level].drop_vars(['i', 'j', 'k', 'level'])
     finest_dx = finest_data.coords['x'][1] - finest_data.coords['x'][0]
     dom = data.domain_size
     fine_coords = [np.linspace(dom[i] + finest_dx/2,
@@ -93,7 +99,7 @@ def get_amr_dataset(data):
     for level in data.get_levels():
         # da = data.get_level_data(f, level)
 
-        ds = data.ds_levels[level].drop(['i', 'j', 'k', 'level'])
+        ds = data.ds_levels[level].drop_vars(['i', 'j', 'k', 'level'])
 
         dsi = ds.interp(x=fine_coords[0], y=fine_coords[1], z=fine_coords[2],
                         method='linear') # use linear interpolation for smoother contours
@@ -135,7 +141,7 @@ def convert_chombo(input_file, output_path):
 
     output_path = Path(output_path)
 
-    fields_to_include = ["Porosity", "Bulk concentration"]
+    # fields_to_include = ["Porosity", "Bulk concentration"]
     fields_to_include = ["Temperature", "Porosity", "Pressure", "zAdvection velocity"]
 
     print(data.comp_names)
@@ -143,8 +149,6 @@ def convert_chombo(input_file, output_path):
     amr_dataset = get_amr_dataset(data)
 
     point_data = {f : np.array(amr_dataset[f]) for f in fields_to_include}
-    # cell_data = {"porosity": np.array(data.get_level_data("Porosity")),
-    #              }
 
     x, y = data.get_mesh_grid_for_level(data.get_levels()[-1])
     dx = x[1]-x[0]

@@ -2,6 +2,7 @@
 npm-debug.log
 .DS_Store
 /*.env
+.venv/**
 dist/
 *.bak
 .idea/
@@ -10,3 +11,10 @@ dist/
 static/icons/
 static/*/old
 vis/
+.cache/**
+**.pyc
+**__pycache__**
+.cache/**
+.venv/**
+**.pyc
+tests/data/output/**
