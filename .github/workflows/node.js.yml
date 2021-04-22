@@ -6,8 +6,14 @@ name: Node.js CI
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - 'pyconvert/**'
+      - 'requirements.txt'
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - 'pyconvert/**'
+      - 'requirements.txt'
 
 jobs:
   build:
