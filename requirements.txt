@@ -16,7 +16,7 @@ decorator==4.4.2
 descartes==1.1.0
 docutils==0.16
 espatools==0.1.0
-Fiona==1.8.13.post1
+Fiona==1.8.13
 geopandas==0.7.0
 h5py==2.10.0
 idna==2.9
