@@ -28,7 +28,8 @@ jobs:
       uses: textbook/git-checkout-submodule-action@master
     - name: Install program dependencies
       run: |
-         sudo apt-get install python3-paraview
+         sudo apt-get update
+         sudo apt-get install python3-paraview --fix-missing
          which pvpython
 
     - name: Install dev dependencies
