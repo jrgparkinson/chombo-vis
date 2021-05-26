@@ -93,7 +93,7 @@
     "browserify-rsa": "4.0.1",
     "browserify-sign": "4.0.4",
     "browserify-zlib": "0.2.0",
-    "browserslist": "4.11.1",
+    "browserslist": "4.16.5",
     "btoa-lite": "1.0.0",
     "buffer": "4.9.2",
     "buffer-alloc": "1.2.0",
