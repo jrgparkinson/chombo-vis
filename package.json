@@ -1017,7 +1017,7 @@
     "write": "1.0.3",
     "write-file-atomic": "2.4.3",
     "write-file-webpack-plugin": "4.5.1",
-    "ws": "6.2.1",
+    "ws": "7.4.6",
     "xmlbuilder": "9.0.7",
     "xmlhttprequest-ssl": "1.6.2",
     "xtend": "4.0.2",
