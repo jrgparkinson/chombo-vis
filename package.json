@@ -917,7 +917,7 @@
     "toidentifier": "1.0.0",
     "toposort": "1.0.7",
     "traverse": "0.6.6",
-    "trim-newlines": "2.0.0",
+    "trim-newlines": "3.0.1",
     "trim-off-newlines": "1.0.1",
     "trim-repeated": "1.0.0",
     "tryer": "1.0.1",
