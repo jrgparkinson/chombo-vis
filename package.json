@@ -253,7 +253,7 @@
     "emojis-list": "3.0.0",
     "encodeurl": "1.0.2",
     "end-of-stream": "1.4.4",
-    "engine.io": "3.4.0",
+    "engine.io": "4.1.2",
     "engine.io-client": "3.4.0",
     "engine.io-parser": "2.2.0",
     "enhanced-resolve": "0.9.1",
