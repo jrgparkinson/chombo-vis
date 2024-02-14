@@ -199,7 +199,7 @@
     "cz-conventional-changelog": "3.0.2",
     "damerau-levenshtein": "1.0.6",
     "dateformat": "3.0.3",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "decamelize": "1.2.0",
     "decamelize-keys": "1.1.0",
     "decode-uri-component": "0.2.0",
