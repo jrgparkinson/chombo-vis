@@ -553,7 +553,7 @@
     "map-cache": "0.2.2",
     "map-obj": "2.0.0",
     "map-visit": "1.0.0",
-    "marked": "0.7.0",
+    "marked": "4.0.10",
     "marked-terminal": "3.3.0",
     "mathjax-node": "^2.1.1",
     "mathml": "^1.1.9",
