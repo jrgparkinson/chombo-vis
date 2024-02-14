@@ -520,7 +520,7 @@
     "loader-runner": "2.4.0",
     "loader-utils": "1.4.0",
     "locate-path": "2.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "lodash._reinterpolate": "3.0.0",
     "lodash.assign": "4.2.0",
     "lodash.capitalize": "4.2.1",
