@@ -24,8 +24,8 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.6
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@master
+    # - name: Checkout submodules
+    #   uses: textbook/git-checkout-submodule-action@master
     - name: Install program dependencies
       run: |
          sudo apt-get update
