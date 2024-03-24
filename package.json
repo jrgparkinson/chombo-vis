@@ -700,7 +700,7 @@
     "pluralize": "1.2.1",
     "portfinder": "1.0.25",
     "posix-character-classes": "0.1.1",
-    "postcss": "8.2.10",
+    "postcss": "8.4.31",
     "postcss-load-config": "2.1.0",
     "postcss-loader": "3.0.0",
     "postcss-modules-extract-imports": "2.0.0",
