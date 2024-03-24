@@ -19,7 +19,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+        token: ${{ secrets.PAT_TOKEN }}
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
@@ -39,7 +43,7 @@ jobs:
 
     - name: Install pipenv
       run: |
-        pip install -r requirements.txt
+        pip install -r requirements.txt --no-build-isolation
 
     - name: Lint with flake8
       run: |
