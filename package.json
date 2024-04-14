@@ -299,7 +299,7 @@
     "expand-tilde": "2.0.2",
     "exports-loader": "0.7.0",
     "expose-loader": "0.7.5",
-    "express": "^4.17.1",
+    "express": "^4.19.2",
     "ext-list": "2.2.2",
     "ext-name": "5.0.0",
     "extend-shallow": "3.0.2",
