@@ -16,16 +16,18 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.6
-      uses: actions/setup-python@v2
+    - name: Checkout
+      uses: actions/checkout@v3
       with:
-        python-version: 3.6
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@master
+        submodules: 'true'
+        token: ${{ secrets.PAT_TOKEN }}
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
     - name: Install program dependencies
       run: |
          sudo apt-get update
