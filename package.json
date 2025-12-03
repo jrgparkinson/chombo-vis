@@ -798,7 +798,7 @@
     "safe-buffer": "5.1.2",
     "safe-regex": "1.1.0",
     "safer-buffer": "2.1.2",
-    "sanitize": "^2.1.0",
+    "sanitize": "^2.1.2",
     "save-remote-file-webpack-plugin": "1.0.2",
     "sax": "1.2.4",
     "schema-utils": "1.0.0",
