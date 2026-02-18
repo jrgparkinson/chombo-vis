@@ -687,7 +687,7 @@
     "path-parse": "1.0.7",
     "path-to-regexp": "0.1.7",
     "path-type": "3.0.0",
-    "pbkdf2": "3.0.17",
+    "pbkdf2": "3.1.5",
     "pend": "1.2.0",
     "picomatch": "2.2.2",
     "pify": "4.0.1",
