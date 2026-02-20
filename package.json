@@ -14,7 +14,7 @@
     "after": "0.8.2",
     "agent-base": "5.1.1",
     "aggregate-error": "3.0.1",
-    "ajv": "6.12.0",
+    "ajv": "8.18.0",
     "ajv-errors": "1.0.1",
     "ajv-keywords": "3.4.1",
     "ansi-colors": "3.2.4",
